@@ -16,7 +16,7 @@ export const products: Product[] = [
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1618307225142-9d4361e5a1a9?q=80&w=1974&auto=format&fit=crop',
     category: 'Terno',
-    sizes: ['46', '48', '50', '52', '54'],
+    sizes: ['P', 'M', 'G', 'GG', '46', '48', '50', '52', '54'],
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ export const products: Product[] = [
     price: 180,
     imageUrl: 'https://images.unsplash.com/photo-1589310243389-66a8b3511aff?q=80&w=1974&auto=format&fit=crop',
     category: 'Camisa',
-    sizes: ['P', 'M', 'G', 'GG'],
+    sizes: ['P', 'M', 'G', 'GG', '38', '39', '40', '41', '42'],
   },
   {
     id: 3,
@@ -52,7 +52,7 @@ export const products: Product[] = [
     price: 550,
     imageUrl: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1964&auto=format&fit=crop',
     category: 'Terno',
-    sizes: ['P', 'M', 'G', 'GG'],
+    sizes: ['P', 'M', 'G', 'GG', '46', '48', '50', '52'],
   },
   {
     id: 6,
@@ -61,7 +61,7 @@ export const products: Product[] = [
     price: 250,
     imageUrl: 'https://images.unsplash.com/photo-1604176354204-9268737828e4?q=80&w=1987&auto=format&fit=crop',
     category: 'Terno',
-    sizes: ['38', '40', '42', '44', '46'],
+    sizes: ['P', 'M', 'G', 'GG', '38', '40', '42', '44', '46'],
   },
   {
     id: 7,
