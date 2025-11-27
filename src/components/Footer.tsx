@@ -34,7 +34,7 @@ const Footer = () => {
         <div className="mt-8 pt-8 border-t border-background/20 flex justify-between items-end text-sm text-background/50">
           <div>
             <p>&copy; {new Date().getFullYear()} <span className="text-brand">La</span> hermandad. Todos os direitos reservados.</p>
-            <Link to="#" className="text-xs hover:text-brand transition-colors mt-2 inline-block">Área de Gestão</Link>
+            <Link to="/admin" className="text-xs hover:text-brand transition-colors mt-2 inline-block">Área de Gestão</Link>
           </div>
           <div className="text-right">
             <p className="text-brand/75 text-xs italic">
@@ -48,6 +48,3 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
-
-export default Footer;
