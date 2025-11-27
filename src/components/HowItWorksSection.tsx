@@ -34,7 +34,7 @@ const HowItWorksSection = () => {
     <div className="bg-gray-50/50">
       <div className="container mx-auto py-24 text-center">
         <h2 className="text-brand font-semibold tracking-wider animate-fade-in">NOSSO JEITO DE ATENDER</h2>
-        <h1 className="text-5xl font-bold font-display mt-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <h1 className="text-4xl md:text-5xl font-bold font-display mt-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
           A loja vai até você
         </h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>

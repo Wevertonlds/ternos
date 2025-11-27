@@ -31,12 +31,12 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-background/20 flex justify-between items-end text-sm text-background/50">
-          <div>
+        <div className="mt-8 pt-8 border-t border-background/20 flex flex-col md:flex-row justify-between items-center md:items-end gap-4 text-sm text-background/50">
+          <div className="text-center md:text-left">
             <p>&copy; {new Date().getFullYear()} <span className="text-brand">La</span> hermandad. Todos os direitos reservados.</p>
             <Link to="/admin" className="text-xs hover:text-brand transition-colors mt-2 inline-block">Área de Gestão</Link>
           </div>
-          <div className="text-right">
+          <div className="text-center md:text-right">
             <p className="text-brand/75 text-xs italic">
               "Gratidão não se paga com dinheiro, sim com atitudes! estamos juntos até depois do fim!"
             </p>
