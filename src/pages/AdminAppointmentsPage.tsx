@@ -19,20 +19,33 @@ const statusConfig: { [key in AppointmentStatus]: { variant: "secondary" | "defa
 
 const AdminAppointmentsPage = () => {
   const { appointments, blockedDates, toggleBlockDate, updateAppointmentStatus } = useScheduling();
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [selectedDates, setSelectedDates] = useState<Date[] | undefined>([]);
 
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    if (!selectedDate) return;
-    setDate(selectedDate);
-  };
-
-  const handleBlockDate = () => {
-    if (date) {
-      toggleBlockDate(date);
+  const handleToggleBlockDates = () => {
+    if (selectedDates && selectedDates.length > 0) {
+      selectedDates.forEach(date => {
+        toggleBlockDate(date);
+      });
+      setSelectedDates([]); // Limpa a seleção após a ação
     }
   };
 
   const isDateBlocked = (d: Date) => blockedDates.some(bd => bd.toDateString() === d.toDateString());
+
+  const getButtonText = () => {
+    if (!selectedDates || selectedDates.length === 0) {
+      return 'Selecione os dias';
+    }
+    const allSelectedAreBlocked = selectedDates.every(isDateBlocked);
+    if (allSelectedAreBlocked) {
+      return `Desbloquear ${selectedDates.length} dia(s)`;
+    }
+    const noneSelectedAreBlocked = !selectedDates.some(isDateBlocked);
+    if (noneSelectedAreBlocked) {
+      return `Bloquear ${selectedDates.length} dia(s)`;
+    }
+    return 'Inverter bloqueio dos dias selecionados';
+  };
 
   return (
     <div>
@@ -99,13 +112,13 @@ const AdminAppointmentsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Bloquear Agenda</CardTitle>
-              <CardDescription>Selecione datas no calendário para torná-las indisponíveis para agendamento.</CardDescription>
+              <CardDescription>Selecione um ou mais dias no calendário para torná-los indisponíveis para agendamento.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               <Calendar
-                mode="single"
-                selected={date}
-                onSelect={handleDateSelect}
+                mode="multiple"
+                selected={selectedDates}
+                onSelect={setSelectedDates}
                 className="rounded-md border"
                 locale={ptBR}
                 modifiers={{ blocked: blockedDates }}
@@ -117,8 +130,12 @@ const AdminAppointmentsPage = () => {
                   },
                 }}
               />
-              <Button onClick={handleBlockDate} className="mt-4 w-full">
-                {date && isDateBlocked(date) ? 'Desbloquear Dia' : 'Bloquear Dia'}
+              <Button 
+                onClick={handleToggleBlockDates} 
+                className="mt-4 w-full"
+                disabled={!selectedDates || selectedDates.length === 0}
+              >
+                {getButtonText()}
               </Button>
             </CardContent>
           </Card>
