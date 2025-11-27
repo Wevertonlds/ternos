@@ -4,6 +4,7 @@ export interface Product {
   brand: string;
   price: number;
   imageUrl: string;
+  category: 'Terno' | 'Camisa' | 'Gravata' | 'Sapato' | 'Cinto' | 'Meia';
 }
 
 export const products: Product[] = [
@@ -13,6 +14,7 @@ export const products: Product[] = [
     brand: 'Alfaiataria Premium',
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1593032465175-3a4905c38335?q=80&w=1974&auto=format&fit=crop',
+    category: 'Terno',
   },
   {
     id: 2,
@@ -20,6 +22,7 @@ export const products: Product[] = [
     brand: 'Elegance Wear',
     price: 180,
     imageUrl: 'https://images.unsplash.com/photo-1589310243389-66a8b3511aff?q=80&w=1974&auto=format&fit=crop',
+    category: 'Camisa',
   },
   {
     id: 3,
@@ -27,6 +30,7 @@ export const products: Product[] = [
     brand: 'Silk Tie Co.',
     price: 120,
     imageUrl: 'https://images.unsplash.com/photo-1589578523433-113f4bee338a?q=80&w=1974&auto=format&fit=crop',
+    category: 'Gravata',
   },
   {
     id: 4,
@@ -34,13 +38,15 @@ export const products: Product[] = [
     brand: 'Classic Footwear',
     price: 450,
     imageUrl: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2012&auto=format&fit=crop',
+    category: 'Sapato',
   },
-    {
+  {
     id: 5,
     name: 'Blazer de Lã Cinza',
     brand: 'Alfaiataria Premium',
     price: 550,
     imageUrl: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1964&auto=format&fit=crop',
+    category: 'Terno',
   },
   {
     id: 6,
@@ -48,5 +54,22 @@ export const products: Product[] = [
     brand: 'Elegance Wear',
     price: 250,
     imageUrl: 'https://images.unsplash.com/photo-1604176354204-9268737828e4?q=80&w=1987&auto=format&fit=crop',
+    category: 'Terno',
+  },
+  {
+    id: 7,
+    name: 'Cinto de Couro Marrom',
+    brand: 'Leather Goods',
+    price: 95,
+    imageUrl: 'https://images.unsplash.com/photo-1620909390382-687495a73336?q=80&w=1974&auto=format&fit=crop',
+    category: 'Cinto',
+  },
+  {
+    id: 8,
+    name: 'Meias de Algodão Egípcio',
+    brand: 'Comfort Sox',
+    price: 45,
+    imageUrl: 'https://images.unsplash.com/photo-1586350977803-6703837b69f3?q=80&w=1974&auto=format&fit=crop',
+    category: 'Meia',
   },
 ];

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
-import { ShoppingBag, Calendar } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 const Header = () => {
   return (
@@ -19,8 +19,8 @@ const Header = () => {
           </Link>
         </nav>
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon">
-            <ShoppingBag className="h-5 w-5" />
+          <Button variant="outline" size="icon">
+            <Calendar className="h-5 w-5" />
           </Button>
           <Button className="bg-brand hover:bg-brand/90 text-brand-foreground">
             <Calendar className="mr-2 h-4 w-4" />
