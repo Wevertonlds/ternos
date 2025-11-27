@@ -18,7 +18,7 @@ const HomePage = () => {
           <span className="text-brand">vem até você</span>
         </h1>
         <p className="mt-6 text-lg md:text-xl text-white/80 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          Atendimento personalizado no conforto da sua casa. Escolha as peças, agende o horário e receba nosso estilista.
+          Agende uma visita e vamos até você. É fácil: escolha nossos produtos e levamos até você, no conforto do seu lar ou onde estiver.
         </p>
         <Link to="/products" className="mt-8 inline-block animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <Button size="lg" className="bg-brand hover:bg-brand/90 text-brand-foreground h-14 px-8 text-lg">
