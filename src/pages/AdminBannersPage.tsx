@@ -40,6 +40,22 @@ const initialBanners: Banner[] = [
     buttonText: 'Ver Novidades',
     buttonLink: '/products',
   },
+  {
+    id: 3,
+    imageUrl: "https://images.unsplash.com/photo-1516914943479-89db7d9ae7f2?q=80&w=1974&auto=format&fit=crop",
+    title: 'A Loja Que <br /> <span class="text-brand">Vai Até Você</span>',
+    subtitle: 'Navegue, escolha suas peças favoritas e agende. Nós levamos tudo até você para provar no conforto da sua casa.',
+    buttonText: 'Entenda Como Funciona',
+    buttonLink: '/how-it-works',
+  },
+  {
+    id: 4,
+    imageUrl: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=2070&auto=format&fit=crop",
+    title: 'Estilo e <br /> <span class="text-brand">Conveniência</span>',
+    subtitle: 'Nossos especialistas em moda vão até você para uma consultoria de estilo personalizada.',
+    buttonText: 'Como Funciona',
+    buttonLink: '/how-it-works',
+  },
 ];
 
 const AdminBannersPage = () => {
