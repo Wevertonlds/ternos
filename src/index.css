@@ -32,8 +32,8 @@
     --sidebar-accent-foreground: 222.2 47.4% 11.2%;
     --sidebar-border: 214.3 31.8% 91.4%;
     --sidebar-ring: 222.2 84% 4.9%;
-    --brand: 43 96% 56%; /* Custom yellow/gold */
-    --brand-foreground: 222.2 47.4% 11.2%;
+    --brand: 30 90% 45%; /* Darker Orange */
+    --brand-foreground: 210 40% 98%; /* White for better contrast */
   }
 
   .dark {
@@ -64,8 +64,8 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217.2 32.6% 17.5%;
     --sidebar-ring: 212.7 26.8% 83.9%;
-    --brand: 43 96% 56%;
-    --brand-foreground: 222.2 47.4% 11.2%;
+    --brand: 30 90% 45%; /* Darker Orange */
+    --brand-foreground: 210 40% 98%; /* White for better contrast */
   }
 }
 
