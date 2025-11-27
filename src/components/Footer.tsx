@@ -34,6 +34,9 @@ const Footer = () => {
         <div className="mt-8 pt-8 border-t border-background/20 text-center text-sm text-background/50">
           <p>&copy; {new Date().getFullYear()} PREMIUM MEN. Todos os direitos reservados.</p>
           <Link to="#" className="text-xs hover:text-brand transition-colors mt-2 inline-block">Área de Gestão</Link>
+          <p className="text-brand mt-6 text-xs italic">
+            "Gratidão não se paga com dinheiro, sim com atitudes! estamos juntos até depois do fim!"
+          </p>
         </div>
       </div>
     </footer>
