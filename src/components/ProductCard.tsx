@@ -8,6 +8,11 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const formattedPrice = product.price.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-0">
@@ -18,8 +23,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <p className="text-sm text-muted-foreground">{product.brand}</p>
       </CardContent>
       <CardFooter className="flex justify-between items-center p-4 pt-0">
-        <p className="text-lg font-semibold">${product.price}</p>
-        <Button>Add to Cart</Button>
+        <p className="text-lg font-semibold">{formattedPrice}</p>
+        <Button>Adicionar ao Provador</Button>
       </CardFooter>
     </Card>
   );
