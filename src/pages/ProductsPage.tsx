@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { products } from '@/data/products';
 import { Button } from '@/components/ui/button';
-import { UserTie, Shirt, Briefcase } from 'lucide-react';
+import { UserCircle, Shirt, Briefcase } from 'lucide-react';
 
 const ProductsPage = () => {
   const categories = [
     { name: 'Todos', value: 'Todos', icon: null },
-    { name: 'Ternos', value: 'Terno', icon: <UserTie className="mr-2 h-4 w-4" /> },
+    { name: 'Ternos', value: 'Terno', icon: <UserCircle className="mr-2 h-4 w-4" /> },
     { name: 'Camisas', value: 'Camisa', icon: <Shirt className="mr-2 h-4 w-4" /> },
     { name: 'Sapatos', value: 'Sapato', icon: null },
     { name: 'Cintos', value: 'Cinto', icon: null },
