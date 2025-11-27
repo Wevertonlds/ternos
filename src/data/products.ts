@@ -13,7 +13,7 @@ export const products: Product[] = [
     name: 'Terno Slim Fit Azul Marinho',
     brand: 'Alfaiataria Premium',
     price: 750,
-    imageUrl: 'https://images.unsplash.com/photo-1593032465175-3a4905c38335?q=80&w=1974&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1618307225142-9d4361e5a1a9?q=80&w=1974&auto=format&fit=crop',
     category: 'Terno',
   },
   {
