@@ -41,7 +41,7 @@ const Footer = () => {
               "Gratidão não se paga com dinheiro, sim com atitudes! estamos juntos até depois do fim!"
             </p>
             <p className="text-brand/75 text-xs font-semibold mt-1">
-              - Weverton Aprigio
+              - A glória é para Deus
             </p>
           </div>
         </div>
