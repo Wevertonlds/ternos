@@ -182,13 +182,13 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Sua sacola de prova está vazia</DialogTitle>
+              <DialogTitle>Selecione seus produtos</DialogTitle>
               <DialogDescription>
-                Para agendar uma visita, primeiro adicione os produtos que você gostaria de experimentar.
+                Para agendarmos o melhor momento, primeiro escolha as peças que deseja provar.
               </DialogDescription>
             </DialogHeader>
             <div className="py-8 text-center">
-              <p className="text-muted-foreground mb-6">Navegue pela nossa coleção e monte sua seleção.</p>
+              <p className="text-muted-foreground mb-6">É o primeiro passo para uma experiência de estilo única.</p>
               <Button onClick={handleNavigateToProducts}>
                 <ShoppingBag className="mr-2 h-4 w-4" />
                 Ver Coleção
