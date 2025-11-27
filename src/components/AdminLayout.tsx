@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Settings, Image, Package, LogOut } from 'lucide-react';
+import { LayoutDashboard, Settings, Image, Package, LogOut, Calendar } from 'lucide-react';
 import { Button } from './ui/button';
 
 const AdminLayout = () => {
@@ -29,17 +29,21 @@ const AdminLayout = () => {
             <LayoutDashboard className="mr-3 h-5 w-5" />
             Dashboard
           </NavLink>
-          <NavLink to="/admin/settings" className={navLinkClasses}>
-            <Settings className="mr-3 h-5 w-5" />
-            Configurações
+          <NavLink to="/admin/appointments" className={navLinkClasses}>
+            <Calendar className="mr-3 h-5 w-5" />
+            Agendamentos
+          </NavLink>
+          <NavLink to="/admin/products" className={navLinkClasses}>
+            <Package className="mr-3 h-5 w-5" />
+            Produtos
           </NavLink>
           <NavLink to="/admin/banners" className={navLinkClasses}>
             <Image className="mr-3 h-5 w-5" />
             Banners
           </NavLink>
-          <NavLink to="/admin/products" className={navLinkClasses}>
-            <Package className="mr-3 h-5 w-5" />
-            Produtos
+          <NavLink to="/admin/settings" className={navLinkClasses}>
+            <Settings className="mr-3 h-5 w-5" />
+            Configurações
           </NavLink>
         </nav>
         <div>

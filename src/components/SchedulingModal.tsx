@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useFittingRoom } from '@/contexts/FittingRoomContext';
+import { useScheduling } from '@/contexts/SchedulingContext';
 import { cn } from '@/lib/utils';
 
 interface SchedulingModalProps {
@@ -33,6 +34,7 @@ const formSchema = z.object({
 
 const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) => {
   const { fittingItems, removeFittingItem } = useFittingRoom();
+  const { addAppointment, blockedDates } = useScheduling();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -45,7 +47,7 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log({
+    addAppointment({
       ...values,
       fittingItems,
     });
@@ -124,7 +126,10 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1))}
+                            disabled={(date) =>
+                              date < new Date(new Date().setDate(new Date().getDate() - 1)) ||
+                              blockedDates.some(d => d.toDateString() === date.toDateString())
+                            }
                             initialFocus
                             locale={ptBR}
                           />

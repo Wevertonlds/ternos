@@ -1,9 +1,17 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Activity, Settings, Image, Package } from 'lucide-react';
+import { Activity, Settings, Image, Package, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useScheduling } from '@/contexts/SchedulingContext';
 
 const AdminDashboardPage = () => {
+  const { appointments } = useScheduling();
+
+  const totalAppointments = appointments.length;
+  const pendingAppointments = appointments.filter(a => a.status === 'Pendente').length;
+  const finishedAppointments = appointments.filter(a => a.status === 'Finalizado').length;
+  const canceledAppointments = appointments.filter(a => a.status === 'Cancelado').length;
+
   return (
     <div>
       <h1 className="text-3xl font-bold font-display mb-6">Dashboard</h1>
@@ -14,39 +22,38 @@ const AdminDashboardPage = () => {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">+2 no último mês</p>
+            <div className="text-2xl font-bold">{totalAppointments}</div>
+            <p className="text-xs text-muted-foreground">Total de agendamentos recebidos</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produtos Cadastrados</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">Total de itens no catálogo</p>
+            <div className="text-2xl font-bold">{pendingAppointments}</div>
+            <p className="text-xs text-muted-foreground">Aguardando atendimento</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Banners Ativos</CardTitle>
-            <Image className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Finalizados</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4</div>
-            <p className="text-xs text-muted-foreground">Banners no carrossel</p>
+            <div className="text-2xl font-bold">{finishedAppointments}</div>
+            <p className="text-xs text-muted-foreground">Atendimentos concluídos</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Configurações</CardTitle>
-            <Settings className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Cancelados</CardTitle>
+            <XCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <Link to="/admin/settings" className="text-sm text-brand hover:underline">
-              Gerenciar o site
-            </Link>
+            <div className="text-2xl font-bold">{canceledAppointments}</div>
+            <p className="text-xs text-muted-foreground">Agendamentos cancelados</p>
           </CardContent>
         </Card>
       </div>
@@ -59,7 +66,7 @@ const AdminDashboardPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p>Comece pelas <Link to="/admin/settings" className="font-semibold text-brand hover:underline">Configurações</Link> para ajustar a aparência e informações de contato, ou vá para <Link to="/admin/banners" className="font-semibold text-brand hover:underline">Banners</Link> e <Link to="/admin/products" className="font-semibold text-brand hover:underline">Produtos</Link> para atualizar o conteúdo.</p>
+            <p>Acesse a nova área de <Link to="/admin/appointments" className="font-semibold text-brand hover:underline">Agendamentos</Link> para gerenciar as visitas e sua agenda.</p>
           </CardContent>
         </Card>
       </div>

@@ -9,6 +9,7 @@ import AdminLayout from './components/AdminLayout';
 import AdminSettingsPage from './pages/AdminSettingsPage';
 import AdminBannersPage from './pages/AdminBannersPage';
 import AdminProductsPage from './pages/AdminProductsPage';
+import AdminAppointmentsPage from './pages/AdminAppointmentsPage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/admin" element={<AdminLoginPage />} />
         <Route element={<AdminLayout />}>
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
           <Route path="/admin/settings" element={<AdminSettingsPage />} />
           <Route path="/admin/banners" element={<AdminBannersPage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
