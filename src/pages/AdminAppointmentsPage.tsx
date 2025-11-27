@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar as CalendarIcon, MoreHorizontal, Check, X, Clock } from 'lucide-react';
+import { MoreHorizontal, Check, X, Clock, MessageCircle } from 'lucide-react';
 
 import { useScheduling, Appointment, AppointmentStatus } from '@/contexts/SchedulingContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,6 @@ import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 const statusConfig: { [key in AppointmentStatus]: { variant: "secondary" | "default" | "destructive", icon: React.ReactNode, label: string } } = {
   Pendente: { variant: 'secondary', icon: <Clock className="mr-1 h-3 w-3" />, label: 'Pendente' },
@@ -47,6 +46,14 @@ const AdminAppointmentsPage = () => {
     return 'Inverter bloqueio dos dias selecionados';
   };
 
+  const formatPhoneForLink = (phone: string) => {
+    let cleaned = phone.replace(/\D/g, '');
+    if ((cleaned.length === 10 || cleaned.length === 11) && !cleaned.startsWith('55')) {
+      cleaned = '55' + cleaned;
+    }
+    return cleaned;
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold font-display mb-6">Gerenciar Agendamentos</h1>
@@ -62,45 +69,54 @@ const AdminAppointmentsPage = () => {
                 {appointments.length > 0 ? (
                   appointments
                     .sort((a, b) => a.date.getTime() - b.date.getTime())
-                    .map((app) => (
-                      <Card key={app.id}>
-                        <CardContent className="p-4 flex flex-col sm:flex-row justify-between">
-                          <div className="flex-1 mb-4 sm:mb-0">
-                            <p className="font-bold">{app.name}</p>
-                            <p className="text-sm text-muted-foreground">{app.address}</p>
-                            <p className="text-sm font-semibold text-brand mt-1">
-                              {format(app.date, "'Dia' dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
-                            </p>
-                            <div className="mt-2">
-                              <p className="text-xs font-medium mb-1">Itens:</p>
-                              <div className="flex flex-wrap gap-2">
-                                {app.fittingItems.map(item => (
-                                  <div key={item.fittingId} className="flex items-center bg-muted text-muted-foreground px-2 py-1 rounded-md text-xs">
-                                    {item.name} ({item.selectedSize})
-                                  </div>
-                                ))}
+                    .map((app) => {
+                      const whatsappLink = `https://wa.me/${formatPhoneForLink(app.phone)}`;
+                      return (
+                        <Card key={app.id}>
+                          <CardContent className="p-4 flex flex-col sm:flex-row justify-between">
+                            <div className="flex-1 mb-4 sm:mb-0">
+                              <p className="font-bold">{app.name}</p>
+                              <p className="text-sm text-muted-foreground">{app.address}</p>
+                              <p className="text-sm text-muted-foreground">WhatsApp: {app.phone}</p>
+                              <p className="text-sm font-semibold text-brand mt-1">
+                                {format(app.date, "'Dia' dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+                              </p>
+                              <div className="mt-2">
+                                <p className="text-xs font-medium mb-1">Itens:</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {app.fittingItems.map(item => (
+                                    <div key={item.fittingId} className="flex items-center bg-muted text-muted-foreground px-2 py-1 rounded-md text-xs">
+                                      {item.name} ({item.selectedSize})
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex items-center">
-                            <Badge variant={statusConfig[app.status].variant} className="mr-2">
-                              {statusConfig[app.status].icon}
-                              {statusConfig[app.status].label}
-                            </Badge>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => updateAppointmentStatus(app.id, 'Finalizado')}>Marcar como Finalizado</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => updateAppointmentStatus(app.id, 'Cancelado')}>Marcar como Cancelado</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => updateAppointmentStatus(app.id, 'Pendente')}>Marcar como Pendente</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
+                            <div className="flex items-center">
+                              <a href={whatsappLink} target="_blank" rel="noopener noreferrer" title="Conversar no WhatsApp">
+                                <Button variant="outline" size="icon" className="mr-2 text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700">
+                                  <MessageCircle className="h-4 w-4" />
+                                </Button>
+                              </a>
+                              <Badge variant={statusConfig[app.status].variant} className="mr-2">
+                                {statusConfig[app.status].icon}
+                                {statusConfig[app.status].label}
+                              </Badge>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                  <DropdownMenuItem onClick={() => updateAppointmentStatus(app.id, 'Finalizado')}>Marcar como Finalizado</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => updateAppointmentStatus(app.id, 'Cancelado')}>Marcar como Cancelado</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => updateAppointmentStatus(app.id, 'Pendente')}>Marcar como Pendente</DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })
                 ) : (
                   <p className="text-muted-foreground text-center py-8">Nenhum agendamento encontrado.</p>
                 )}

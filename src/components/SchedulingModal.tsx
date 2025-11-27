@@ -157,7 +157,7 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Telefone</FormLabel>
+                      <FormLabel>WhatsApp</FormLabel>
                       <FormControl>
                         <Input placeholder="(XX) XXXXX-XXXX" {...field} />
                       </FormControl>
