@@ -38,7 +38,7 @@ const banners = [
 
 const HeroCarousel = () => {
   const plugin = React.useRef(
-    Autoplay({ delay: 19000, stopOnInteraction: true })
+    Autoplay({ delay: 7000, stopOnInteraction: true })
   );
 
   return (
