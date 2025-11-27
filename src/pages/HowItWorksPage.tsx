@@ -1,7 +1,6 @@
 import React from 'react';
 import HowItWorksStep from '@/components/HowItWorksStep';
 import { Search, CheckCircle2, CalendarDays, Home } from 'lucide-react';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 const HowItWorksPage = () => {
   const steps = [
@@ -41,31 +40,17 @@ const HowItWorksPage = () => {
         <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
           Reinventamos sua experiência com a moda masculina. Em vez de você ir até a loja, nós levamos a exclusividade e o conforto até você. Descubra um novo jeito de comprar.
         </p>
-        <div className="mt-16 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-4xl mx-auto"
-          >
-            <CarouselContent>
-              {steps.map((step, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                  <div className="p-1">
-                    <HowItWorksStep
-                      number={step.number}
-                      icon={step.icon}
-                      title={step.title}
-                      description={step.description}
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden sm:flex" />
-            <CarouselNext className="hidden sm:flex" />
-          </Carousel>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-16">
+          {steps.map((step, index) => (
+            <div key={index} className="animate-fade-in" style={{ animationDelay: `${0.4 + index * 0.1}s` }}>
+              <HowItWorksStep
+                number={step.number}
+                icon={step.icon}
+                title={step.title}
+                description={step.description}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>
