@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { products } from '@/data/products';
 import { Button } from '@/components/ui/button';
-import { UserCircle, Shirt, Briefcase } from 'lucide-react';
+import { UserCircle, Shirt, Briefcase, Footprints, Minus, Layers } from 'lucide-react';
 
 const ProductsPage = () => {
   const categories = [
     { name: 'Todos', value: 'Todos', icon: null },
     { name: 'Ternos', value: 'Terno', icon: <UserCircle className="mr-2 h-4 w-4" /> },
     { name: 'Camisas', value: 'Camisa', icon: <Shirt className="mr-2 h-4 w-4" /> },
-    { name: 'Sapatos', value: 'Sapato', icon: null },
-    { name: 'Cintos', value: 'Cinto', icon: null },
+    { name: 'Sapatos', value: 'Sapato', icon: <Footprints className="mr-2 h-4 w-4" /> },
+    { name: 'Cintos', value: 'Cinto', icon: <Minus className="mr-2 h-4 w-4" /> },
     { name: 'Gravatas', value: 'Gravata', icon: <Briefcase className="mr-2 h-4 w-4" /> },
-    { name: 'Meias', value: 'Meia', icon: null },
+    { name: 'Meias', value: 'Meia', icon: <Layers className="mr-2 h-4 w-4" /> },
   ];
 
   const [activeCategory, setActiveCategory] = useState('Todos');
