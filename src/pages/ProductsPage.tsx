@@ -4,17 +4,17 @@ import { products } from '@/data/products';
 import { Button } from '@/components/ui/button';
 import { UserTie, Shirt, Tie } from 'lucide-react';
 
-const categories = [
-  { name: 'Todos', value: 'Todos', icon: null },
-  { name: 'Ternos', value: 'Terno', icon: <UserTie className="mr-2 h-4 w-4" /> },
-  { name: 'Camisas', value: 'Camisa', icon: <Shirt className="mr-2 h-4 w-4" /> },
-  { name: 'Sapatos', value: 'Sapato', icon: null },
-  { name: 'Cintos', value: 'Cinto', icon: null },
-  { name: 'Gravatas', value: 'Gravata', icon: <Tie className="mr-2 h-4 w-4" /> },
-  { name: 'Meias', value: 'Meia', icon: null },
-];
-
 const ProductsPage = () => {
+  const categories = [
+    { name: 'Todos', value: 'Todos', icon: null },
+    { name: 'Ternos', value: 'Terno', icon: <UserTie className="mr-2 h-4 w-4" /> },
+    { name: 'Camisas', value: 'Camisa', icon: <Shirt className="mr-2 h-4 w-4" /> },
+    { name: 'Sapatos', value: 'Sapato', icon: null },
+    { name: 'Cintos', value: 'Cinto', icon: null },
+    { name: 'Gravatas', value: 'Gravata', icon: <Tie className="mr-2 h-4 w-4" /> },
+    { name: 'Meias', value: 'Meia', icon: null },
+  ];
+
   const [activeCategory, setActiveCategory] = useState('Todos');
 
   const filteredProducts =
