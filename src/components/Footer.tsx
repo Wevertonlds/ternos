@@ -31,14 +31,16 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-background/20 text-center text-sm text-background/50">
-          <p>&copy; {new Date().getFullYear()} PREMIUM MEN. Todos os direitos reservados.</p>
-          <Link to="#" className="text-xs hover:text-brand transition-colors mt-2 inline-block">Área de Gestão</Link>
-          <div className="mt-6">
-            <p className="text-brand text-xs italic">
+        <div className="mt-8 pt-8 border-t border-background/20 flex justify-between items-end text-sm text-background/50">
+          <div>
+            <p>&copy; {new Date().getFullYear()} PREMIUM MEN. Todos os direitos reservados.</p>
+            <Link to="#" className="text-xs hover:text-brand transition-colors mt-2 inline-block">Área de Gestão</Link>
+          </div>
+          <div className="text-right">
+            <p className="text-brand/75 text-xs italic">
               "Gratidão não se paga com dinheiro, sim com atitudes! estamos juntos até depois do fim!"
             </p>
-            <p className="text-brand text-xs font-semibold mt-1">
+            <p className="text-brand/75 text-xs font-semibold mt-1">
               - Weverton Aprigio
             </p>
           </div>
