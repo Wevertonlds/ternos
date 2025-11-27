@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <h3 className="text-2xl font-bold font-display tracking-wider">
-              La hermandad
+              <span className="text-brand">La</span> hermandad
             </h3>
             <p className="mt-4 text-background/70 max-w-sm">
               Elegância que vem até você. Oferecemos uma curadoria de moda masculina com a conveniência de um atendimento personalizado em domicílio.
@@ -33,7 +33,7 @@ const Footer = () => {
         </div>
         <div className="mt-8 pt-8 border-t border-background/20 flex justify-between items-end text-sm text-background/50">
           <div>
-            <p>&copy; {new Date().getFullYear()} La hermandad. Todos os direitos reservados.</p>
+            <p>&copy; {new Date().getFullYear()} <span className="text-brand">La</span> hermandad. Todos os direitos reservados.</p>
             <Link to="#" className="text-xs hover:text-brand transition-colors mt-2 inline-block">Área de Gestão</Link>
           </div>
           <div className="text-right">
