@@ -4,19 +4,18 @@ import { Product } from '@/data/products';
 import { Button } from './ui/button';
 import { useFittingRoom } from '@/contexts/FittingRoomContext';
 import { toast } from 'sonner';
-import { CheckCircle } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addFittingItem, fittingItems } = useFittingRoom();
-  const isInFittingRoom = fittingItems.some((item) => item.id === product.id);
+  const { addFittingItem } = useFittingRoom();
 
-  const handleAddItem = () => {
-    addFittingItem(product);
-    toast.success(`${product.name} adicionado ao provador!`);
+  const handleAddItem = (size: string) => {
+    addFittingItem(product, size);
+    toast.success(`${product.name} (Tamanho: ${size}) adicionado ao provador!`);
   };
 
   const formattedPrice = product.price.toLocaleString('pt-BR', {
@@ -35,16 +34,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </CardContent>
       <CardFooter className="flex justify-between items-center p-4 pt-0">
         <p className="text-lg font-semibold">{formattedPrice}</p>
-        <Button onClick={handleAddItem} disabled={isInFittingRoom}>
-          {isInFittingRoom ? (
-            <>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Adicionado
-            </>
-          ) : (
-            'Adicionar ao Provador'
-          )}
-        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button>Adicionar ao Provador</Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2">
+            <div className="grid grid-cols-4 gap-2">
+              {product.sizes.map((size) => (
+                <Button
+                  key={size}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleAddItem(size)}
+                >
+                  {size}
+                </Button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
       </CardFooter>
     </Card>
   );

@@ -1,28 +1,35 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Product } from '@/data/products';
 
+export interface FittingItem extends Product {
+  selectedSize: string;
+  fittingId: string; // Unique ID for product-size combo, e.g., "1-M"
+}
+
 interface FittingRoomContextType {
-  fittingItems: Product[];
-  addFittingItem: (item: Product) => void;
-  removeFittingItem: (itemId: number) => void;
+  fittingItems: FittingItem[];
+  addFittingItem: (item: Product, size: string) => void;
+  removeFittingItem: (fittingId: string) => void;
 }
 
 const FittingRoomContext = createContext<FittingRoomContextType | undefined>(undefined);
 
 export const FittingRoomProvider = ({ children }: { children: ReactNode }) => {
-  const [fittingItems, setFittingItems] = useState<Product[]>([]);
+  const [fittingItems, setFittingItems] = useState<FittingItem[]>([]);
 
-  const addFittingItem = (item: Product) => {
+  const addFittingItem = (item: Product, size: string) => {
+    const fittingId = `${item.id}-${size}`;
     setFittingItems((prevItems) => {
-      if (prevItems.find((i) => i.id === item.id)) {
-        return prevItems; // Item already exists
+      if (prevItems.find((i) => i.fittingId === fittingId)) {
+        return prevItems; // Item with this size already exists
       }
-      return [...prevItems, item];
+      const newItem: FittingItem = { ...item, selectedSize: size, fittingId };
+      return [...prevItems, newItem];
     });
   };
 
-  const removeFittingItem = (itemId: number) => {
-    setFittingItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+  const removeFittingItem = (fittingId: string) => {
+    setFittingItems((prevItems) => prevItems.filter((item) => item.fittingId !== fittingId));
   };
 
   return (

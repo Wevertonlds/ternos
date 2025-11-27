@@ -77,15 +77,17 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
               <h4 className="font-semibold mb-2">Itens para provar:</h4>
               <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
                 {fittingItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between bg-muted p-2 rounded-md">
+                  <div key={item.fittingId} className="flex items-center justify-between bg-muted p-2 rounded-md">
                     <div className="flex items-center">
                       <img src={item.imageUrl} alt={item.name} className="w-12 h-12 object-cover rounded-md mr-3" />
                       <div>
                         <p className="font-medium text-sm">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">{item.brand}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.brand} - Tamanho: {item.selectedSize}
+                        </p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => removeFittingItem(item.id)}>
+                    <Button variant="ghost" size="icon" onClick={() => removeFittingItem(item.fittingId)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>

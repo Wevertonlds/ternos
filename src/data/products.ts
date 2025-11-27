@@ -5,6 +5,7 @@ export interface Product {
   price: number;
   imageUrl: string;
   category: 'Terno' | 'Camisa' | 'Gravata' | 'Sapato' | 'Cinto' | 'Meia';
+  sizes: string[];
 }
 
 export const products: Product[] = [
@@ -15,6 +16,7 @@ export const products: Product[] = [
     price: 750,
     imageUrl: 'https://images.unsplash.com/photo-1618307225142-9d4361e5a1a9?q=80&w=1974&auto=format&fit=crop',
     category: 'Terno',
+    sizes: ['46', '48', '50', '52', '54'],
   },
   {
     id: 2,
@@ -23,6 +25,7 @@ export const products: Product[] = [
     price: 180,
     imageUrl: 'https://images.unsplash.com/photo-1589310243389-66a8b3511aff?q=80&w=1974&auto=format&fit=crop',
     category: 'Camisa',
+    sizes: ['P', 'M', 'G', 'GG'],
   },
   {
     id: 3,
@@ -31,6 +34,7 @@ export const products: Product[] = [
     price: 120,
     imageUrl: 'https://images.unsplash.com/photo-1589578523433-113f4bee338a?q=80&w=1974&auto=format&fit=crop',
     category: 'Gravata',
+    sizes: ['Tamanho Único'],
   },
   {
     id: 4,
@@ -39,6 +43,7 @@ export const products: Product[] = [
     price: 450,
     imageUrl: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2012&auto=format&fit=crop',
     category: 'Sapato',
+    sizes: ['39', '40', '41', '42', '43'],
   },
   {
     id: 5,
@@ -47,6 +52,7 @@ export const products: Product[] = [
     price: 550,
     imageUrl: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=1964&auto=format&fit=crop',
     category: 'Terno',
+    sizes: ['P', 'M', 'G', 'GG'],
   },
   {
     id: 6,
@@ -55,6 +61,7 @@ export const products: Product[] = [
     price: 250,
     imageUrl: 'https://images.unsplash.com/photo-1604176354204-9268737828e4?q=80&w=1987&auto=format&fit=crop',
     category: 'Terno',
+    sizes: ['38', '40', '42', '44', '46'],
   },
   {
     id: 7,
@@ -63,6 +70,7 @@ export const products: Product[] = [
     price: 95,
     imageUrl: 'https://images.unsplash.com/photo-1620909390382-687495a73336?q=80&w=1974&auto=format&fit=crop',
     category: 'Cinto',
+    sizes: ['90cm', '100cm', '110cm'],
   },
   {
     id: 8,
@@ -71,5 +79,6 @@ export const products: Product[] = [
     price: 45,
     imageUrl: 'https://images.unsplash.com/photo-1586350977803-6703837b69f3?q=80&w=1974&auto=format&fit=crop',
     category: 'Meia',
+    sizes: ['Tamanho Único'],
   },
 ];
