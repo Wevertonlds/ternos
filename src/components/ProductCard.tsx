@@ -38,8 +38,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <PopoverTrigger asChild>
             <Button>Adicionar ao Provador</Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-2">
-            <div className="grid grid-cols-4 gap-2">
+          <PopoverContent className="w-56 p-2">
+            <div className="flex flex-wrap gap-2">
               {product.sizes.map((size) => (
                 <Button
                   key={size}
