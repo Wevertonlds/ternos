@@ -42,7 +42,7 @@ const HowItWorksPage = () => {
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-16">
           {steps.map((step, index) => (
-            <div key={index} className="animate-fade-in" style={{ animationDelay: `${0.4 + index * 0.1}s` }}>
+            <div key={index} className="pt-5 pl-5 animate-fade-in" style={{ animationDelay: `${0.4 + index * 0.1}s` }}>
               <HowItWorksStep
                 number={step.number}
                 icon={step.icon}
