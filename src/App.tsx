@@ -5,13 +5,16 @@ import HowItWorksPage from './pages/HowItWorksPage';
 import Layout from './components/Layout';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminLayout from './components/AdminLayout';
+import AdminSettingsPage from './pages/AdminSettingsPage';
+import AdminBannersPage from './pages/AdminBannersPage';
+import AdminProductsPage from './pages/AdminProductsPage';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/admin" element={<AdminLoginPage />} />
-        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        {/* Rotas Públicas */}
         <Route
           path="/*"
           element={
@@ -24,6 +27,15 @@ function App() {
             </Layout>
           }
         />
+
+        {/* Rotas de Admin */}
+        <Route path="/admin" element={<AdminLoginPage />} />
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="/admin/settings" element={<AdminSettingsPage />} />
+          <Route path="/admin/banners" element={<AdminBannersPage />} />
+          <Route path="/admin/products" element={<AdminProductsPage />} />
+        </Route>
       </Routes>
     </Router>
   );
