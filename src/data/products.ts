@@ -1,4 +1,4 @@
-export interface Sneaker {
+export interface Product {
   id: number;
   name: string;
   brand: string;
@@ -6,7 +6,7 @@ export interface Sneaker {
   imageUrl: string;
 }
 
-export const sneakers: Sneaker[] = [
+export const products: Product[] = [
   {
     id: 1,
     name: 'Air Max 270',
