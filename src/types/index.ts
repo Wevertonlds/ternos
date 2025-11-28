@@ -35,3 +35,13 @@ export interface Settings {
   contact_phone: string;
   footer_quote?: string;
 }
+
+export interface Banner {
+  id: number;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  buttonText: string;
+  buttonLink: string;
+  created_at?: string;
+}

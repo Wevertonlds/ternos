@@ -1,45 +1,41 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import Autoplay from "embla-carousel-autoplay";
-
-const banners = [
-  {
-    imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1974&auto=format&fit=crop",
-    title: 'Elegância que <br /> <span class="text-brand">vem até você</span>',
-    subtitle: 'Agende uma visita e vamos até você. É fácil: escolha nossos produtos e levamos até você, no conforto do seu lar ou onde estiver.',
-    buttonText: 'Conhecer Coleção',
-    buttonLink: '/products',
-  },
-  {
-    imageUrl: "https://images.unsplash.com/photo-1521119989659-a83eee488004?q=80&w=1974&auto=format&fit=crop",
-    title: 'Nova Coleção <br /> <span class="text-brand">Outono/Inverno</span>',
-    subtitle: 'Descubra as últimas tendências e peças exclusivas que acabaram de chegar.',
-    buttonText: 'Ver Novidades',
-    buttonLink: '/products',
-  },
-  {
-    imageUrl: "https://images.unsplash.com/photo-1516914943479-89db7d9ae7f2?q=80&w=1974&auto=format&fit=crop",
-    title: 'A Loja Que <br /> <span class="text-brand">Vai Até Você</span>',
-    subtitle: 'Navegue, escolha suas peças favoritas e agende. Nós levamos tudo até você para provar no conforto da sua casa.',
-    buttonText: 'Entenda Como Funciona',
-    buttonLink: '/how-it-works',
-  },
-  {
-    imageUrl: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=2070&auto=format&fit=crop",
-    title: 'Estilo e <br /> <span class="text-brand">Conveniência</span>',
-    subtitle: 'Nossos especialistas em moda vão até você para uma consultoria de estilo personalizada.',
-    buttonText: 'Como Funciona',
-    buttonLink: '/how-it-works',
-  },
-];
+import { useBanners } from '@/hooks/useBanners';
 
 const HeroCarousel = () => {
+  const { data: banners = [], isLoading, error } = useBanners();
+
   const plugin = React.useRef(
     Autoplay({ delay: 7000, stopOnInteraction: true })
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
+        <Loader2 className="h-16 w-16 animate-spin text-brand" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
+        <p className="text-red-500">Erro ao carregar banners: {error.message}</p>
+      </div>
+    );
+  }
+
+  if (banners.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
+        <p>Nenhum banner disponível no momento.</p>
+      </div>
+    );
+  }
 
   return (
     <Carousel

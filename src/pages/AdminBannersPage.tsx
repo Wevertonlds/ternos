@@ -9,8 +9,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { PlusCircle, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Banner } from '@/types';
+import { useBanners, useAddBanner, useUpdateBanner, useDeleteBanner } from '@/hooks/useBanners';
 
 const bannerSchema = z.object({
   id: z.number().optional(),
@@ -21,49 +23,19 @@ const bannerSchema = z.object({
   buttonLink: z.string().min(1, 'O link do botão é obrigatório.'),
 });
 
-type Banner = z.infer<typeof bannerSchema>;
-
-const initialBanners: Banner[] = [
-  {
-    id: 1,
-    imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1974&auto=format&fit=crop",
-    title: 'Elegância que <br /> <span class="text-brand">vem até você</span>',
-    subtitle: 'Agende uma visita e vamos até você. É fácil: escolha nossos produtos e levamos até você, no conforto do seu lar ou onde estiver.',
-    buttonText: 'Conhecer Coleção',
-    buttonLink: '/products',
-  },
-  {
-    id: 2,
-    imageUrl: "https://images.unsplash.com/photo-1521119989659-a83eee488004?q=80&w=1974&auto=format&fit=crop",
-    title: 'Nova Coleção <br /> <span class="text-brand">Outono/Inverno</span>',
-    subtitle: 'Descubra as últimas tendências e peças exclusivas que acabaram de chegar.',
-    buttonText: 'Ver Novidades',
-    buttonLink: '/products',
-  },
-  {
-    id: 3,
-    imageUrl: "https://images.unsplash.com/photo-1516914943479-89db7d9ae7f2?q=80&w=1974&auto=format&fit=crop",
-    title: 'A Loja Que <br /> <span class="text-brand">Vai Até Você</span>',
-    subtitle: 'Navegue, escolha suas peças favoritas e agende. Nós levamos tudo até você para provar no conforto da sua casa.',
-    buttonText: 'Entenda Como Funciona',
-    buttonLink: '/how-it-works',
-  },
-  {
-    id: 4,
-    imageUrl: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=2070&auto=format&fit=crop",
-    title: 'Estilo e <br /> <span class="text-brand">Conveniência</span>',
-    subtitle: 'Nossos especialistas em moda vão até você para uma consultoria de estilo personalizada.',
-    buttonText: 'Como Funciona',
-    buttonLink: '/how-it-works',
-  },
-];
+type BannerFormData = z.infer<typeof bannerSchema>;
 
 const AdminBannersPage = () => {
-  const [banners, setBanners] = useState<Banner[]>(initialBanners);
+  const { data: banners = [], isLoading, error } = useBanners();
+  const addBannerMutation = useAddBanner();
+  const updateBannerMutation = useUpdateBanner();
+  const deleteBannerMutation = useDeleteBanner();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [deletingBannerId, setDeletingBannerId] = useState<number | null>(null);
 
-  const form = useForm<Banner>({
+  const form = useForm<BannerFormData>({
     resolver: zodResolver(bannerSchema),
     defaultValues: {
       title: '',
@@ -86,24 +58,49 @@ const AdminBannersPage = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: number) => {
-    setBanners(banners.filter((b) => b.id !== id));
-    toast.success('Banner removido com sucesso!');
+  const handleDeleteConfirm = () => {
+    if (deletingBannerId === null) return;
+    deleteBannerMutation.mutate(deletingBannerId, {
+      onSuccess: () => {
+        toast.success('Banner removido com sucesso!');
+        setDeletingBannerId(null);
+      },
+      onError: (err: any) => {
+        toast.error(`Erro ao remover banner: ${err.message}`);
+      },
+    });
   };
 
-  const onSubmit = (values: Banner) => {
+  const onSubmit = (values: BannerFormData) => {
+    const mutationOptions = {
+      onSuccess: () => {
+        toast.success(`Banner ${editingBanner ? 'atualizado' : 'adicionado'} com sucesso!`);
+        setIsDialogOpen(false);
+      },
+      onError: (err: any) => {
+        toast.error(`Erro ao salvar banner: ${err.message}`);
+      },
+    };
+
     if (editingBanner) {
-      // Edit
-      setBanners(banners.map((b) => (b.id === editingBanner.id ? { ...b, ...values } : b)));
-      toast.success('Banner atualizado com sucesso!');
+      updateBannerMutation.mutate({ ...values, id: editingBanner.id }, mutationOptions);
     } else {
-      // Add
-      const newBanner = { ...values, id: Date.now() };
-      setBanners([...banners, newBanner]);
-      toast.success('Banner adicionado com sucesso!');
+      const { id, ...newBannerData } = values;
+      addBannerMutation.mutate(newBannerData as Omit<Banner, 'id' | 'created_at'>, mutationOptions);
     }
-    setIsDialogOpen(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-12 w-12 animate-spin text-brand" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <p className="text-red-500">Erro ao carregar banners: {error.message}</p>;
+  }
 
   return (
     <div>
@@ -158,7 +155,10 @@ const AdminBannersPage = () => {
                   </FormItem>
                 )} />
                 <div className="flex justify-end pt-4">
-                  <Button type="submit">Salvar</Button>
+                  <Button type="submit" disabled={addBannerMutation.isPending || updateBannerMutation.isPending}>
+                    {(addBannerMutation.isPending || updateBannerMutation.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Salvar
+                  </Button>
                 </div>
               </form>
             </Form>
@@ -187,9 +187,9 @@ const AdminBannersPage = () => {
                 <Button variant="outline" size="sm" onClick={() => handleEdit(banner)}>
                   <Edit className="mr-2 h-4 w-4" /> Editar
                 </Button>
-                <AlertDialog>
+                <AlertDialog open={deletingBannerId === banner.id} onOpenChange={(open) => !open && setDeletingBannerId(null)}>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm">
+                    <Button variant="destructive" size="sm" onClick={() => setDeletingBannerId(banner.id)}>
                       <Trash2 className="mr-2 h-4 w-4" /> Excluir
                     </Button>
                   </AlertDialogTrigger>
@@ -202,7 +202,10 @@ const AdminBannersPage = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete(banner.id!)}>Continuar</AlertDialogAction>
+                      <AlertDialogAction onClick={handleDeleteConfirm} disabled={deleteBannerMutation.isPending}>
+                        {deleteBannerMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Continuar
+                      </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
