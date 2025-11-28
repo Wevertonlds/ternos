@@ -5,7 +5,7 @@ import { MoreHorizontal, Check, X, Clock, MessageCircle, Loader2 } from 'lucide-
 import { toast } from 'sonner';
 
 import { useAppointments, useBlockedDates, useToggleBlockDate, useUpdateAppointmentStatus } from '@/hooks/useAppointments';
-import { AppointmentStatus } from '@/types';
+import { Appointment, AppointmentStatus } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
@@ -64,10 +64,72 @@ const AdminAppointmentsPage = () => {
     return cleaned;
   };
 
-  const sortedAppointments = useMemo(() => 
-    [...appointments].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
-    [appointments]
-  );
+  const { pendingAppointments, pastAppointments } = useMemo(() => {
+    const pending: Appointment[] = [];
+    const past: Appointment[] = [];
+
+    appointments.forEach(app => {
+      if (app.status === 'Pendente') {
+        pending.push(app);
+      } else {
+        past.push(app);
+      }
+    });
+
+    pending.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    past.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return { pendingAppointments: pending, pastAppointments: past };
+  }, [appointments]);
+
+  const renderAppointmentCard = (app: Appointment) => {
+    const whatsappLink = `https://wa.me/${formatPhoneForLink(app.phone)}`;
+    return (
+      <Card key={app.id}>
+        <CardContent className="p-4 flex flex-col sm:flex-row justify-between">
+          <div className="flex-1 mb-4 sm:mb-0">
+            <p className="font-bold">{app.name}</p>
+            <p className="text-sm text-muted-foreground">{app.address}</p>
+            <p className="text-sm text-muted-foreground">WhatsApp: {app.phone}</p>
+            <p className="text-sm font-semibold text-brand mt-1">
+              {format(new Date(app.date), "'Dia' dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+            </p>
+            <div className="mt-2">
+              <p className="text-xs font-medium mb-1">Itens:</p>
+              <div className="flex flex-wrap gap-2">
+                {app.fitting_items.map(item => (
+                  <div key={item.fittingId} className="flex items-center bg-muted text-muted-foreground px-2 py-1 rounded-md text-xs">
+                    {item.name} ({item.selectedSize})
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center">
+            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" title="Conversar no WhatsApp">
+              <Button variant="outline" size="icon" className="mr-2 text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700">
+                <MessageCircle className="h-4 w-4" />
+              </Button>
+            </a>
+            <Badge variant={statusConfig[app.status].variant} className="mr-2">
+              {statusConfig[app.status].icon}
+              {statusConfig[app.status].label}
+            </Badge>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Finalizado')}>Marcar como Finalizado</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Cancelado')}>Marcar como Cancelado</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Pendente')}>Marcar como Pendente</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div>
@@ -77,64 +139,37 @@ const AdminAppointmentsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Próximos Agendamentos</CardTitle>
-              <CardDescription>Visualize e gerencie os agendamentos dos seus clientes.</CardDescription>
+              <CardDescription>Visualize e gerencie os agendamentos pendentes.</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoadingAppointments ? (
                 <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>
               ) : (
                 <div className="space-y-4">
-                  {sortedAppointments.length > 0 ? (
-                    sortedAppointments.map((app) => {
-                      const whatsappLink = `https://wa.me/${formatPhoneForLink(app.phone)}`;
-                      return (
-                        <Card key={app.id}>
-                          <CardContent className="p-4 flex flex-col sm:flex-row justify-between">
-                            <div className="flex-1 mb-4 sm:mb-0">
-                              <p className="font-bold">{app.name}</p>
-                              <p className="text-sm text-muted-foreground">{app.address}</p>
-                              <p className="text-sm text-muted-foreground">WhatsApp: {app.phone}</p>
-                              <p className="text-sm font-semibold text-brand mt-1">
-                                {format(new Date(app.date), "'Dia' dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
-                              </p>
-                              <div className="mt-2">
-                                <p className="text-xs font-medium mb-1">Itens:</p>
-                                <div className="flex flex-wrap gap-2">
-                                  {app.fitting_items.map(item => (
-                                    <div key={item.fittingId} className="flex items-center bg-muted text-muted-foreground px-2 py-1 rounded-md text-xs">
-                                      {item.name} ({item.selectedSize})
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center">
-                              <a href={whatsappLink} target="_blank" rel="noopener noreferrer" title="Conversar no WhatsApp">
-                                <Button variant="outline" size="icon" className="mr-2 text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700">
-                                  <MessageCircle className="h-4 w-4" />
-                                </Button>
-                              </a>
-                              <Badge variant={statusConfig[app.status].variant} className="mr-2">
-                                {statusConfig[app.status].icon}
-                                {statusConfig[app.status].label}
-                              </Badge>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Finalizado')}>Marcar como Finalizado</DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Cancelado')}>Marcar como Cancelado</DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Pendente')}>Marcar como Pendente</DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })
+                  {pendingAppointments.length > 0 ? (
+                    pendingAppointments.map(renderAppointmentCard)
                   ) : (
-                    <p className="text-muted-foreground text-center py-8">Nenhum agendamento encontrado.</p>
+                    <p className="text-muted-foreground text-center py-8">Nenhum agendamento pendente.</p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Histórico de Agendamentos</CardTitle>
+              <CardDescription>Visualize agendamentos finalizados e cancelados.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoadingAppointments ? (
+                <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>
+              ) : (
+                <div className="space-y-4">
+                  {pastAppointments.length > 0 ? (
+                    pastAppointments.map(renderAppointmentCard)
+                  ) : (
+                    <p className="text-muted-foreground text-center py-8">Nenhum agendamento no histórico.</p>
                   )}
                 </div>
               )}
