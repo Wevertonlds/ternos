@@ -19,10 +19,10 @@ const bannerSchema = z.object({
   title_line_1: z.string().min(1, 'A primeira linha do título é obrigatória.'),
   title_line_2: z.string().optional(),
   subtitle: z.string().min(1, 'O subtítulo é obrigatório.'),
-  imageUrl: z.string().optional(),
+  image_url: z.string().optional(),
   imageFile: z.any().optional(),
-  buttonText: z.string().min(1, 'O texto do botão é obrigatório.'),
-  buttonLink: z.string().min(1, 'O link do botão é obrigatório.'),
+  button_text: z.string().min(1, 'O texto do botão é obrigatório.'),
+  button_link: z.string().min(1, 'O link do botão é obrigatório.'),
 }).refine(data => {
   return data.id || (data.imageFile && data.imageFile.length > 0);
 }, {
@@ -49,9 +49,9 @@ const AdminBannersPage = () => {
       title_line_1: '',
       title_line_2: '',
       subtitle: '',
-      imageUrl: '',
-      buttonText: '',
-      buttonLink: '',
+      image_url: '',
+      button_text: '',
+      button_link: '',
       imageFile: undefined,
     },
   });
@@ -63,26 +63,26 @@ const AdminBannersPage = () => {
       title_line_1: '',
       title_line_2: '',
       subtitle: '', 
-      imageUrl: '',
+      image_url: '',
       imageFile: undefined, 
-      buttonText: '', 
-      buttonLink: '' 
+      button_text: '', 
+      button_link: '' 
     });
     setIsDialogOpen(true);
   };
 
   const handleEdit = (banner: Banner) => {
     setEditingBanner(banner);
-    setImagePreview(banner.imageUrl);
+    setImagePreview(banner.image_url);
     const [line1 = '', line2 = ''] = banner.title.split('<br />');
     form.reset({
       id: banner.id,
       title_line_1: line1,
       title_line_2: line2,
       subtitle: banner.subtitle || '',
-      imageUrl: banner.imageUrl,
-      buttonText: banner.buttonText || '',
-      buttonLink: banner.buttonLink || '',
+      image_url: banner.image_url,
+      button_text: banner.button_text || '',
+      button_link: banner.button_link || '',
       imageFile: undefined,
     });
     setIsDialogOpen(true);
@@ -123,17 +123,17 @@ const AdminBannersPage = () => {
         id: editingBanner.id,
         title: finalTitle,
         subtitle: values.subtitle,
-        buttonText: values.buttonText,
-        buttonLink: values.buttonLink,
-        imageUrl: editingBanner.imageUrl,
+        button_text: values.button_text,
+        button_link: values.button_link,
+        image_url: editingBanner.image_url,
       };
       updateBannerMutation.mutate({ banner: bannerToUpdate, imageFile }, mutationOptions);
     } else {
-      const bannerToAdd: Omit<Banner, 'id' | 'created_at' | 'imageUrl'> = {
+      const bannerToAdd: Omit<Banner, 'id' | 'created_at' | 'image_url'> = {
         title: finalTitle,
         subtitle: values.subtitle,
-        buttonText: values.buttonText,
-        buttonLink: values.buttonLink,
+        button_text: values.button_text,
+        button_link: values.button_link,
       };
       addBannerMutation.mutate({ banner: bannerToAdd, imageFile }, mutationOptions);
     }
@@ -220,14 +220,14 @@ const AdminBannersPage = () => {
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="buttonText" render={({ field }) => (
+                <FormField control={form.control} name="button_text" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Texto do Botão</FormLabel>
                     <FormControl><Input placeholder="Ex: Ver Coleção" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="buttonLink" render={({ field }) => (
+                <FormField control={form.control} name="button_link" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Link do Botão</FormLabel>
                     <FormControl><Input placeholder="Ex: /products" {...field} /></FormControl>
@@ -257,7 +257,7 @@ const AdminBannersPage = () => {
           {banners.map((banner) => (
             <Card key={banner.id} className="overflow-hidden">
               <CardHeader className="p-0">
-                <img src={banner.imageUrl} alt="Preview" className="w-full h-40 object-cover" />
+                <img src={banner.image_url} alt="Preview" className="w-full h-40 object-cover" />
               </CardHeader>
               <CardContent className="p-4">
                 <CardTitle className="text-lg" dangerouslySetInnerHTML={{ __html: banner.title.replace(/<span class="text-brand">/g, '<span class="text-orange-500">') }} />

@@ -18,10 +18,10 @@ const uploadImage = async (file: File): Promise<string> => {
 };
 
 // Helper to delete image from storage
-const deleteImage = async (imageUrl: string) => {
-  if (!imageUrl) return;
+const deleteImage = async (image_url: string) => {
+  if (!image_url) return;
   try {
-    const imagePath = new URL(imageUrl).pathname.split('/banner-images/')[1];
+    const imagePath = new URL(image_url).pathname.split('/banner-images/')[1];
     if (imagePath) {
       await supabase.storage.from('banner-images').remove([imagePath]);
     }
@@ -46,25 +46,25 @@ export const useBanners = () => {
 
 // Add a new banner
 type AddBannerParams = {
-  banner: Omit<Banner, 'id' | 'created_at' | 'imageUrl'>;
+  banner: Omit<Banner, 'id' | 'created_at' | 'image_url'>;
   imageFile: File;
 };
 const addBanner = async ({ banner, imageFile }: AddBannerParams) => {
-  const imageUrl = await uploadImage(imageFile);
+  const image_url = await uploadImage(imageFile);
   
   const { data, error } = await supabase
     .from('banners')
     .insert([{
       title: banner.title,
       subtitle: banner.subtitle,
-      buttonText: banner.buttonText,
-      buttonLink: banner.buttonLink,
-      imageUrl: imageUrl,
+      button_text: banner.button_text,
+      button_link: banner.button_link,
+      image_url: image_url,
     }])
     .select();
   
   if (error) {
-    await deleteImage(imageUrl);
+    await deleteImage(image_url);
     throw new Error(error.message);
   }
   return data;
@@ -86,13 +86,13 @@ type UpdateBannerParams = {
   imageFile?: File;
 };
 const updateBanner = async ({ banner, imageFile }: UpdateBannerParams) => {
-  let final_imageUrl = banner.imageUrl;
+  let final_image_url = banner.image_url;
 
   if (imageFile) {
-    if (banner.imageUrl) {
-      await deleteImage(banner.imageUrl);
+    if (banner.image_url) {
+      await deleteImage(banner.image_url);
     }
-    final_imageUrl = await uploadImage(imageFile);
+    final_image_url = await uploadImage(imageFile);
   }
 
   const { data, error } = await supabase
@@ -100,9 +100,9 @@ const updateBanner = async ({ banner, imageFile }: UpdateBannerParams) => {
     .update({
       title: banner.title,
       subtitle: banner.subtitle,
-      buttonText: banner.buttonText,
-      buttonLink: banner.buttonLink,
-      imageUrl: final_imageUrl,
+      button_text: banner.button_text,
+      button_link: banner.button_link,
+      image_url: final_image_url,
     })
     .eq('id', banner.id)
     .select();
@@ -123,8 +123,8 @@ export const useUpdateBanner = () => {
 
 // Delete a banner
 const deleteBanner = async (banner: Banner) => {
-  if (banner.imageUrl) {
-    await deleteImage(banner.imageUrl);
+  if (banner.image_url) {
+    await deleteImage(banner.image_url);
   }
   const { error } = await supabase.from('banners').delete().eq('id', banner.id);
   if (error) throw new Error(error.message);
