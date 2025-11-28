@@ -47,6 +47,7 @@ const AdminBannersPage = () => {
     defaultValues: {
       title: '',
       subtitle: '',
+      imageUrl: '',
       buttonText: '',
       buttonLink: '',
       imageFile: undefined,
@@ -59,6 +60,7 @@ const AdminBannersPage = () => {
     form.reset({ 
       title: '', 
       subtitle: '', 
+      imageUrl: '',
       imageFile: undefined, 
       buttonText: '', 
       buttonLink: '' 
