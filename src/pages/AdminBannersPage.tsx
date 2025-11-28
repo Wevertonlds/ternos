@@ -110,12 +110,23 @@ const AdminBannersPage = () => {
     };
 
     if (editingBanner) {
-      const { imageFile: _i, image_url: _u, ...bannerData } = values;
-      const updatedBanner = { ...bannerData, id: editingBanner.id, image_url: editingBanner.image_url };
-      updateBannerMutation.mutate({ banner: updatedBanner, imageFile }, mutationOptions);
+      const bannerToUpdate: Omit<Banner, 'created_at'> = {
+        id: editingBanner.id,
+        title: values.title,
+        subtitle: values.subtitle,
+        button_text: values.button_text,
+        button_link: values.button_link,
+        image_url: editingBanner.image_url, // Pass original URL for potential deletion
+      };
+      updateBannerMutation.mutate({ banner: bannerToUpdate, imageFile }, mutationOptions);
     } else {
-      const { id, image_url, imageFile: _i, ...newBannerData } = values;
-      addBannerMutation.mutate({ banner: newBannerData as any, imageFile }, mutationOptions);
+      const bannerToAdd: Omit<Banner, 'id' | 'created_at' | 'image_url'> = {
+        title: values.title,
+        subtitle: values.subtitle,
+        button_text: values.button_text,
+        button_link: values.button_link,
+      };
+      addBannerMutation.mutate({ banner: bannerToAdd, imageFile }, mutationOptions);
     }
   };
 

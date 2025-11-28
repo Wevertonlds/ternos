@@ -122,21 +122,25 @@ const AdminProductsPage = () => {
     };
 
     if (editingProduct) {
-      const { imageFile: _i, image_url: _u, ...productData } = values;
-      const updatedProduct = {
-        ...productData,
+      const productToUpdate: Omit<Product, 'created_at'> = {
         id: editingProduct.id,
-        image_url: editingProduct.image_url,
+        name: values.name,
+        brand: values.brand,
+        price: values.price,
+        category: values.category,
         sizes: values.sizes.split(',').map(s => s.trim()),
+        image_url: editingProduct.image_url, // Pass original URL
       };
-      updateProductMutation.mutate({ product: updatedProduct, imageFile }, mutationOptions);
+      updateProductMutation.mutate({ product: productToUpdate, imageFile }, mutationOptions);
     } else {
-      const { id, image_url, imageFile: _i, ...newProductData } = values;
-      const newProduct = {
-        ...newProductData,
+      const productToAdd: Omit<Product, 'id' | 'created_at' | 'image_url'> = {
+        name: values.name,
+        brand: values.brand,
+        price: values.price,
+        category: values.category,
         sizes: values.sizes.split(',').map(s => s.trim()),
       };
-      addProductMutation.mutate({ product: newProduct as any, imageFile }, mutationOptions);
+      addProductMutation.mutate({ product: productToAdd, imageFile }, mutationOptions);
     }
   };
 
