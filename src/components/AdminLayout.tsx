@@ -13,7 +13,7 @@ const AdminLayout = () => {
   const handleLogout = async () => {
     try {
       await signOut();
-      navigate('/admin');
+      navigate('/');
     } catch (error) {
       toast.error('Erro ao sair.');
     }
