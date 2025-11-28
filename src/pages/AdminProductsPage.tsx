@@ -23,9 +23,16 @@ const productSchema = z.object({
   name: z.string().min(1, 'O nome é obrigatório.'),
   brand: z.string().min(1, 'A marca é obrigatória.'),
   price: z.coerce.number().min(0, 'O preço deve ser um número positivo.'),
-  imageUrl: z.string().url('Por favor, insira uma URL de imagem válida.'),
+  imageUrl: z.string().optional(),
+  imageFile: z.any().optional(),
   category: z.enum(['Terno', 'Camisa', 'Gravata', 'Sapato', 'Cinto', 'Meia']),
   sizes: z.string().min(1, 'Informe ao menos um tamanho.'),
+}).refine(data => {
+  // If creating a new product (no id), an image file must be provided.
+  return data.id || (data.imageFile && data.imageFile.length > 0);
+}, {
+  message: 'A imagem do produto é obrigatória.',
+  path: ['imageFile'],
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -42,7 +49,8 @@ const AdminProductsPage = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -50,11 +58,13 @@ const AdminProductsPage = () => {
 
   const handleAddNew = () => {
     setEditingProduct(null);
+    setImagePreview(null);
     form.reset({
       name: '',
       brand: '',
       price: 0,
       imageUrl: '',
+      imageFile: undefined,
       category: 'Terno',
       sizes: '',
     });
@@ -63,27 +73,32 @@ const AdminProductsPage = () => {
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
+    setImagePreview(product.imageUrl);
     form.reset({
       ...product,
       sizes: product.sizes.join(', '),
+      imageFile: undefined,
     });
     setIsDialogOpen(true);
   };
 
   const handleDeleteConfirm = () => {
-    if (deletingProductId === null) return;
-    deleteProductMutation.mutate(deletingProductId, {
+    if (!deletingProduct) return;
+    deleteProductMutation.mutate(deletingProduct, {
       onSuccess: () => {
         toast.success('Produto removido com sucesso!');
-        setDeletingProductId(null);
+        setDeletingProduct(null);
       },
       onError: (err: any) => {
         toast.error(`Erro ao remover produto: ${err.message}`);
+        setDeletingProduct(null);
       },
     });
   };
 
   const onSubmit = (values: ProductFormData) => {
+    const imageFile = values.imageFile?.[0];
+
     const mutationOptions = {
       onSuccess: () => {
         toast.success(`Produto ${editingProduct ? 'atualizado' : 'adicionado'} com sucesso!`);
@@ -95,19 +110,21 @@ const AdminProductsPage = () => {
     };
 
     if (editingProduct) {
+      const { imageFile: _i, imageUrl: _u, ...productData } = values;
       const updatedProduct = {
-        ...values,
+        ...productData,
         id: editingProduct.id,
+        imageUrl: editingProduct.imageUrl,
         sizes: values.sizes.split(',').map(s => s.trim()),
       };
-      updateProductMutation.mutate(updatedProduct, mutationOptions);
+      updateProductMutation.mutate({ product: updatedProduct, imageFile }, mutationOptions);
     } else {
-      const { id, ...newProductData } = values;
+      const { id, imageUrl, imageFile: _i, ...newProductData } = values;
       const newProduct = {
         ...newProductData,
         sizes: values.sizes.split(',').map(s => s.trim()),
       };
-      addProductMutation.mutate(newProduct as Omit<Product, 'id' | 'created_at'>, mutationOptions);
+      addProductMutation.mutate({ product: newProduct as any, imageFile }, mutationOptions);
     }
   };
 
@@ -151,7 +168,7 @@ const AdminProductsPage = () => {
                             <DropdownMenuItem onClick={() => handleEdit(product)}>
                               <Edit className="mr-2 h-4 w-4" /> Editar
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setDeletingProductId(product.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                            <DropdownMenuItem onClick={() => setDeletingProduct(product)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
                               <Trash2 className="mr-2 h-4 w-4" /> Excluir
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -227,9 +244,34 @@ const AdminProductsPage = () => {
               <FormField control={form.control} name="price" render={({ field }) => (
                 <FormItem><FormLabel>Preço</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
-              <FormField control={form.control} name="imageUrl" render={({ field }) => (
-                <FormItem><FormLabel>URL da Imagem</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
+              <FormField
+                control={form.control}
+                name="imageFile"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Imagem do Produto</FormLabel>
+                    {imagePreview && <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-md my-2" />}
+                    <FormControl>
+                      <Input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            field.onChange(e.target.files);
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setImagePreview(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField control={form.control} name="category" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Categoria</FormLabel>
@@ -256,16 +298,16 @@ const AdminProductsPage = () => {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={deletingProductId !== null} onOpenChange={() => setDeletingProductId(null)}>
+      <AlertDialog open={deletingProduct !== null} onOpenChange={() => setDeletingProduct(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Essa ação não pode ser desfeita. Isso excluirá permanentemente o produto.
+              Essa ação não pode ser desfeita. Isso excluirá permanentemente o produto e sua imagem.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeletingProductId(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setDeletingProduct(null)}>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteConfirm} disabled={deleteProductMutation.isPending}>
               {deleteProductMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Continuar
