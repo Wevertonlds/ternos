@@ -41,7 +41,7 @@ export interface Banner {
   title: string;
   subtitle: string;
   imageUrl: string;
-  buttonText: string;
-  buttonLink: string;
+  button_text: string;
+  button_link: string;
   created_at?: string;
 }

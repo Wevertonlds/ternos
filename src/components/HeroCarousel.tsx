@@ -61,9 +61,9 @@ const HeroCarousel = () => {
                 <p className="mt-6 text-lg md:text-xl text-white/80 max-w-2xl mx-auto" style={{ animationDelay: '0.2s' }}>
                   {banner.subtitle}
                 </p>
-                <Link to={banner.buttonLink} className="mt-8 inline-block" style={{ animationDelay: '0.4s' }}>
+                <Link to={banner.button_link} className="mt-8 inline-block" style={{ animationDelay: '0.4s' }}>
                   <Button size="lg" className="bg-brand hover:bg-brand/90 text-brand-foreground h-14 px-8 text-lg">
-                    {banner.buttonText}
+                    {banner.button_text}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>

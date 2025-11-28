@@ -20,8 +20,8 @@ const bannerSchema = z.object({
   subtitle: z.string().min(1, 'O subtítulo é obrigatório.'),
   imageUrl: z.string().optional(),
   imageFile: z.any().optional(),
-  buttonText: z.string().min(1, 'O texto do botão é obrigatório.'),
-  buttonLink: z.string().min(1, 'O link do botão é obrigatório.'),
+  button_text: z.string().min(1, 'O texto do botão é obrigatório.'),
+  button_link: z.string().min(1, 'O link do botão é obrigatório.'),
 }).refine(data => {
   return data.id || (data.imageFile && data.imageFile.length > 0);
 }, {
@@ -48,8 +48,8 @@ const AdminBannersPage = () => {
       title: '',
       subtitle: '',
       imageUrl: '',
-      buttonText: '',
-      buttonLink: '',
+      button_text: '',
+      button_link: '',
       imageFile: undefined,
     },
   });
@@ -62,8 +62,8 @@ const AdminBannersPage = () => {
       subtitle: '', 
       imageUrl: '',
       imageFile: undefined, 
-      buttonText: '', 
-      buttonLink: '' 
+      button_text: '', 
+      button_link: '' 
     });
     setIsDialogOpen(true);
   };
@@ -75,8 +75,8 @@ const AdminBannersPage = () => {
       ...banner,
       title: banner.title || '',
       subtitle: banner.subtitle || '',
-      buttonText: banner.buttonText || '',
-      buttonLink: banner.buttonLink || '',
+      button_text: banner.button_text || '',
+      button_link: banner.button_link || '',
       imageFile: undefined,
     });
     setIsDialogOpen(true);
@@ -192,14 +192,14 @@ const AdminBannersPage = () => {
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="buttonText" render={({ field }) => (
+                <FormField control={form.control} name="button_text" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Texto do Botão</FormLabel>
                     <FormControl><Input placeholder="Ex: Ver Coleção" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="buttonLink" render={({ field }) => (
+                <FormField control={form.control} name="button_link" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Link do Botão</FormLabel>
                     <FormControl><Input placeholder="Ex: /products" {...field} /></FormControl>
