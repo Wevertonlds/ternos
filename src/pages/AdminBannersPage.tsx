@@ -162,16 +162,16 @@ const AdminBannersPage = () => {
               Adicionar Banner
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col p-0">
-            <DialogHeader className="p-6 pb-4">
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
               <DialogTitle>{editingBanner ? 'Editar Banner' : 'Adicionar Novo Banner'}</DialogTitle>
               <DialogDescription>
                 Preencha as informações abaixo para criar ou atualizar um banner.
               </DialogDescription>
             </DialogHeader>
-            <div className="flex-1 overflow-y-auto px-6">
+            <div className="max-h-[60vh] overflow-y-auto pr-6 pl-2 -mr-2">
               <Form {...form}>
-                <form id="bannerForm" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form id="bannerForm" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
                   <FormField
                     control={form.control}
                     name="imageFile"
@@ -238,7 +238,7 @@ const AdminBannersPage = () => {
                 </form>
               </Form>
             </div>
-            <DialogFooter className="p-6 pt-4 border-t">
+            <DialogFooter>
               <Button type="submit" form="bannerForm" disabled={addBannerMutation.isPending || updateBannerMutation.isPending}>
                 {(addBannerMutation.isPending || updateBannerMutation.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Salvar
