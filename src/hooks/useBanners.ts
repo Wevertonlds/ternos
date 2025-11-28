@@ -52,15 +52,16 @@ type AddBannerParams = {
 const addBanner = async ({ banner, imageFile }: AddBannerParams) => {
   const imageUrl = await uploadImage(imageFile);
   
-  const newBannerPayload = {
-    title: banner.title,
-    subtitle: banner.subtitle,
-    buttonText: banner.buttonText,
-    buttonLink: banner.buttonLink,
-    imageUrl: imageUrl,
-  };
-
-  const { data, error } = await supabase.from('banners').insert([newBannerPayload]).select();
+  const { data, error } = await supabase
+    .from('banners')
+    .insert([{
+      title: banner.title,
+      subtitle: banner.subtitle,
+      buttonText: banner.buttonText,
+      buttonLink: banner.buttonLink,
+      imageUrl: imageUrl,
+    }])
+    .select();
   
   if (error) {
     await deleteImage(imageUrl);
@@ -94,17 +95,15 @@ const updateBanner = async ({ banner, imageFile }: UpdateBannerParams) => {
     final_imageUrl = await uploadImage(imageFile);
   }
 
-  const updatesPayload = {
-    title: banner.title,
-    subtitle: banner.subtitle,
-    buttonText: banner.buttonText,
-    buttonLink: banner.buttonLink,
-    imageUrl: final_imageUrl,
-  };
-
   const { data, error } = await supabase
     .from('banners')
-    .update(updatesPayload)
+    .update({
+      title: banner.title,
+      subtitle: banner.subtitle,
+      buttonText: banner.buttonText,
+      buttonLink: banner.buttonLink,
+      imageUrl: final_imageUrl,
+    })
     .eq('id', banner.id)
     .select();
     
