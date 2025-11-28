@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import ProductCard from '@/components/ProductCard';
-import { products } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import { Button } from '@/components/ui/button';
-import { UserCircle, Shirt, Briefcase, Footprints, Minus, Layers } from 'lucide-react';
+import { UserCircle, Shirt, Briefcase, Footprints, Minus, Layers, Loader2 } from 'lucide-react';
+import { Product } from '@/types';
 
 const ProductsPage = () => {
   const categories = [
@@ -16,11 +17,28 @@ const ProductsPage = () => {
   ];
 
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const { data: products, isLoading, error } = useProducts();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-16 w-16 animate-spin text-brand" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-red-500">Erro ao carregar produtos: {error.message}</p>
+      </div>
+    );
+  }
 
   const filteredProducts =
     activeCategory === 'Todos'
       ? products
-      : products.filter((product) => product.category === activeCategory);
+      : products?.filter((product) => product.category === activeCategory);
 
   return (
     <div className="bg-white">
@@ -45,7 +63,7 @@ const ProductsPage = () => {
           ))}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-12">
-          {filteredProducts.map((product, index) => (
+          {filteredProducts?.map((product: Product, index: number) => (
             <div key={product.id} className="animate-fade-in" style={{ animationDelay: `${0.5 + index * 0.05}s` }}>
               <ProductCard product={product} />
             </div>

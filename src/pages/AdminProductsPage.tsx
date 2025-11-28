@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
-import { products as initialProducts, Product } from '@/data/products';
+import { Product } from '@/types';
+import { useProducts, useAddProduct, useUpdateProduct, useDeleteProduct } from '@/hooks/useProducts';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { PlusCircle, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Edit, Trash2, Loader2 } from 'lucide-react';
 
 const productSchema = z.object({
   id: z.number().optional(),
@@ -30,11 +31,15 @@ const productSchema = z.object({
 type ProductFormData = z.infer<typeof productSchema>;
 
 const categories: Product['category'][] = ['Terno', 'Camisa', 'Gravata', 'Sapato', 'Cinto', 'Meia'];
-const mainCategories = ['Terno', 'Camisa', 'Gravata'];
-const otherCategories = ['Sapato', 'Cinto', 'Meia'];
+const mainCategories: Product['category'][] = ['Terno', 'Camisa', 'Gravata'];
+const otherCategories: Product['category'][] = ['Sapato', 'Cinto', 'Meia'];
 
 const AdminProductsPage = () => {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const { data: products = [], isLoading, error } = useProducts();
+  const addProductMutation = useAddProduct();
+  const updateProductMutation = useUpdateProduct();
+  const deleteProductMutation = useDeleteProduct();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
@@ -67,26 +72,43 @@ const AdminProductsPage = () => {
 
   const handleDeleteConfirm = () => {
     if (deletingProductId === null) return;
-    setProducts(products.filter((p) => p.id !== deletingProductId));
-    toast.success('Produto removido com sucesso!');
-    setDeletingProductId(null);
+    deleteProductMutation.mutate(deletingProductId, {
+      onSuccess: () => {
+        toast.success('Produto removido com sucesso!');
+        setDeletingProductId(null);
+      },
+      onError: (err: any) => {
+        toast.error(`Erro ao remover produto: ${err.message}`);
+      },
+    });
   };
 
   const onSubmit = (values: ProductFormData) => {
-    const productData: Product = {
-      ...values,
-      id: editingProduct ? editingProduct.id : Date.now(),
-      sizes: values.sizes.split(',').map(s => s.trim()),
+    const mutationOptions = {
+      onSuccess: () => {
+        toast.success(`Produto ${editingProduct ? 'atualizado' : 'adicionado'} com sucesso!`);
+        setIsDialogOpen(false);
+      },
+      onError: (err: any) => {
+        toast.error(`Erro ao salvar produto: ${err.message}`);
+      },
     };
 
     if (editingProduct) {
-      setProducts(products.map((p) => (p.id === editingProduct.id ? productData : p)));
-      toast.success('Produto atualizado com sucesso!');
+      const updatedProduct = {
+        ...values,
+        id: editingProduct.id,
+        sizes: values.sizes.split(',').map(s => s.trim()),
+      };
+      updateProductMutation.mutate(updatedProduct, mutationOptions);
     } else {
-      setProducts([...products, productData]);
-      toast.success('Produto adicionado com sucesso!');
+      const { id, ...newProductData } = values;
+      const newProduct = {
+        ...newProductData,
+        sizes: values.sizes.split(',').map(s => s.trim()),
+      };
+      addProductMutation.mutate(newProduct as Omit<Product, 'id' | 'created_at'>, mutationOptions);
     }
-    setIsDialogOpen(false);
   };
 
   const renderProductTable = (categoryList: Product['category'][]) => {
@@ -152,6 +174,18 @@ const AdminProductsPage = () => {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-12 w-12 animate-spin text-brand" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <p className="text-red-500">Erro ao carregar produtos: {error.message}</p>;
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -177,7 +211,6 @@ const AdminProductsPage = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Product Form Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
@@ -213,14 +246,16 @@ const AdminProductsPage = () => {
                 <FormItem><FormLabel>Tamanhos (separados por vírgula)</FormLabel><FormControl><Input placeholder="P, M, G, 40, 42" {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <div className="flex justify-end pt-4">
-                <Button type="submit">Salvar</Button>
+                <Button type="submit" disabled={addProductMutation.isPending || updateProductMutation.isPending}>
+                  {(addProductMutation.isPending || updateProductMutation.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Salvar
+                </Button>
               </div>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deletingProductId !== null} onOpenChange={() => setDeletingProductId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -231,7 +266,10 @@ const AdminProductsPage = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeletingProductId(null)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>Continuar</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={deleteProductMutation.isPending}>
+              {deleteProductMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Continuar
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

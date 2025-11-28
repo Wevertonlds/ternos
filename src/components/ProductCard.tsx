@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Product } from '@/data/products';
+import { Product } from '@/types';
 import { Button } from './ui/button';
 import { useFittingRoom } from '@/contexts/FittingRoomContext';
 import { toast } from 'sonner';
