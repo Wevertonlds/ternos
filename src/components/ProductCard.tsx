@@ -38,7 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Card className="overflow-hidden flex flex-col h-full">
       <CardHeader className="p-0">
-        <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-cover" />
+        <img src={product.image_url} alt={product.name} className="w-full h-48 object-cover" />
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <CardTitle className="text-lg font-bold">{product.name}</CardTitle>

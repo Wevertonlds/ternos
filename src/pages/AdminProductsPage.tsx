@@ -23,7 +23,7 @@ const productSchema = z.object({
   name: z.string().min(1, 'O nome é obrigatório.'),
   brand: z.string().min(1, 'A marca é obrigatória.'),
   price: z.coerce.number().min(0, 'O preço deve ser um número positivo.'),
-  imageUrl: z.string().optional(),
+  image_url: z.string().optional(),
   imageFile: z.any().optional(),
   category: z.enum(['Terno', 'Camisa', 'Gravata', 'Sapato', 'Cinto', 'Meia']),
   sizes: z.string().min(1, 'Informe ao menos um tamanho.'),
@@ -70,7 +70,7 @@ const AdminProductsPage = () => {
       name: '',
       brand: '',
       price: 0,
-      imageUrl: '',
+      image_url: '',
       imageFile: undefined,
       category: 'Terno',
       sizes: '',
@@ -80,13 +80,13 @@ const AdminProductsPage = () => {
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
-    setImagePreview(product.imageUrl);
+    setImagePreview(product.image_url);
     form.reset({
       id: product.id,
       name: product.name || '',
       brand: product.brand || '',
       price: product.price,
-      imageUrl: product.imageUrl,
+      image_url: product.image_url,
       category: product.category,
       sizes: product.sizes.join(', '),
       imageFile: undefined,
@@ -122,16 +122,16 @@ const AdminProductsPage = () => {
     };
 
     if (editingProduct) {
-      const { imageFile: _i, imageUrl: _u, ...productData } = values;
+      const { imageFile: _i, image_url: _u, ...productData } = values;
       const updatedProduct = {
         ...productData,
         id: editingProduct.id,
-        imageUrl: editingProduct.imageUrl,
+        image_url: editingProduct.image_url,
         sizes: values.sizes.split(',').map(s => s.trim()),
       };
       updateProductMutation.mutate({ product: updatedProduct, imageFile }, mutationOptions);
     } else {
-      const { id, imageUrl, imageFile: _i, ...newProductData } = values;
+      const { id, image_url, imageFile: _i, ...newProductData } = values;
       const newProduct = {
         ...newProductData,
         sizes: values.sizes.split(',').map(s => s.trim()),
@@ -162,7 +162,7 @@ const AdminProductsPage = () => {
                   filteredProducts.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell className="hidden sm:table-cell">
-                        <img alt={product.name} className="aspect-square rounded-md object-cover" height="64" src={product.imageUrl} width="64" />
+                        <img alt={product.name} className="aspect-square rounded-md object-cover" height="64" src={product.image_url} width="64" />
                       </TableCell>
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>{product.brand}</TableCell>

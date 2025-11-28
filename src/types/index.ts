@@ -3,7 +3,7 @@ export interface Product {
   name: string;
   brand: string;
   price: number;
-  imageUrl: string;
+  image_url: string;
   category: 'Terno' | 'Camisa' | 'Gravata' | 'Sapato' | 'Cinto' | 'Meia';
   sizes: string[];
   created_at?: string;
@@ -40,7 +40,7 @@ export interface Banner {
   id: number;
   title: string;
   subtitle: string;
-  imageUrl: string;
+  image_url: string;
   button_text: string;
   button_link: string;
   created_at?: string;

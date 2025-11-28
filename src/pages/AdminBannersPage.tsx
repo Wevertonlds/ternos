@@ -18,7 +18,7 @@ const bannerSchema = z.object({
   id: z.number().optional(),
   title: z.string().min(1, 'O título é obrigatório.'),
   subtitle: z.string().min(1, 'O subtítulo é obrigatório.'),
-  imageUrl: z.string().optional(),
+  image_url: z.string().optional(),
   imageFile: z.any().optional(),
   button_text: z.string().min(1, 'O texto do botão é obrigatório.'),
   button_link: z.string().min(1, 'O link do botão é obrigatório.'),
@@ -47,7 +47,7 @@ const AdminBannersPage = () => {
     defaultValues: {
       title: '',
       subtitle: '',
-      imageUrl: '',
+      image_url: '',
       button_text: '',
       button_link: '',
       imageFile: undefined,
@@ -60,7 +60,7 @@ const AdminBannersPage = () => {
     form.reset({ 
       title: '', 
       subtitle: '', 
-      imageUrl: '',
+      image_url: '',
       imageFile: undefined, 
       button_text: '', 
       button_link: '' 
@@ -70,12 +70,12 @@ const AdminBannersPage = () => {
 
   const handleEdit = (banner: Banner) => {
     setEditingBanner(banner);
-    setImagePreview(banner.imageUrl);
+    setImagePreview(banner.image_url);
     form.reset({
       id: banner.id,
       title: banner.title || '',
       subtitle: banner.subtitle || '',
-      imageUrl: banner.imageUrl,
+      image_url: banner.image_url,
       button_text: banner.button_text || '',
       button_link: banner.button_link || '',
       imageFile: undefined,
@@ -110,11 +110,11 @@ const AdminBannersPage = () => {
     };
 
     if (editingBanner) {
-      const { imageFile: _i, imageUrl: _u, ...bannerData } = values;
-      const updatedBanner = { ...bannerData, id: editingBanner.id, imageUrl: editingBanner.imageUrl };
+      const { imageFile: _i, image_url: _u, ...bannerData } = values;
+      const updatedBanner = { ...bannerData, id: editingBanner.id, image_url: editingBanner.image_url };
       updateBannerMutation.mutate({ banner: updatedBanner, imageFile }, mutationOptions);
     } else {
-      const { id, imageUrl, imageFile: _i, ...newBannerData } = values;
+      const { id, image_url, imageFile: _i, ...newBannerData } = values;
       addBannerMutation.mutate({ banner: newBannerData as any, imageFile }, mutationOptions);
     }
   };
@@ -230,7 +230,7 @@ const AdminBannersPage = () => {
           {banners.map((banner) => (
             <Card key={banner.id} className="overflow-hidden">
               <CardHeader className="p-0">
-                <img src={banner.imageUrl} alt="Preview" className="w-full h-40 object-cover" />
+                <img src={banner.image_url} alt="Preview" className="w-full h-40 object-cover" />
               </CardHeader>
               <CardContent className="p-4">
                 <CardTitle className="text-lg" dangerouslySetInnerHTML={{ __html: banner.title.replace(/<span class="text-brand">/g, '<span class="text-orange-500">') }} />

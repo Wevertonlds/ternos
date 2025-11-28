@@ -88,7 +88,7 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
                 {fittingItems.map((item) => (
                   <div key={item.fittingId} className="flex items-center justify-between bg-muted p-2 rounded-md">
                     <div className="flex items-center">
-                      <img src={item.imageUrl} alt={item.name} className="w-12 h-12 object-cover rounded-md mr-3" />
+                      <img src={item.image_url} alt={item.name} className="w-12 h-12 object-cover rounded-md mr-3" />
                       <div>
                         <p className="font-medium text-sm">{item.name}</p>
                         <p className="text-xs text-muted-foreground">

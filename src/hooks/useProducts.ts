@@ -18,10 +18,10 @@ const uploadImage = async (file: File): Promise<string> => {
 };
 
 // Helper to delete image from storage
-const deleteImage = async (imageUrl: string) => {
-  if (!imageUrl) return;
+const deleteImage = async (image_url: string) => {
+  if (!image_url) return;
   try {
-    const imagePath = new URL(imageUrl).pathname.split('/product-images/')[1];
+    const imagePath = new URL(image_url).pathname.split('/product-images/')[1];
     if (imagePath) {
       await supabase.storage.from('product-images').remove([imagePath]);
     }
@@ -46,15 +46,15 @@ export const useProducts = () => {
 
 // Add a new product
 type AddProductParams = {
-  product: Omit<Product, 'id' | 'created_at' | 'imageUrl'>;
+  product: Omit<Product, 'id' | 'created_at' | 'image_url'>;
   imageFile: File;
 };
 const addProduct = async ({ product, imageFile }: AddProductParams) => {
-  const imageUrl = await uploadImage(imageFile);
-  const { data, error } = await supabase.from('products').insert([{ ...product, imageUrl }]).select();
+  const image_url = await uploadImage(imageFile);
+  const { data, error } = await supabase.from('products').insert([{ ...product, image_url }]).select();
   if (error) {
     // If DB insert fails, try to clean up the uploaded image
-    await deleteImage(imageUrl);
+    await deleteImage(image_url);
     throw new Error(error.message);
   }
   return data;
@@ -76,16 +76,16 @@ type UpdateProductParams = {
   imageFile?: File;
 };
 const updateProduct = async ({ product, imageFile }: UpdateProductParams) => {
-  let imageUrl = product.imageUrl;
+  let image_url = product.image_url;
 
   if (imageFile) {
-    if (product.imageUrl) {
-      await deleteImage(product.imageUrl);
+    if (product.image_url) {
+      await deleteImage(product.image_url);
     }
-    imageUrl = await uploadImage(imageFile);
+    image_url = await uploadImage(imageFile);
   }
 
-  const { id, created_at, ...updates } = { ...product, imageUrl };
+  const { id, created_at, ...updates } = { ...product, image_url };
   const { data, error } = await supabase.from('products').update(updates).eq('id', id).select();
   if (error) throw new Error(error.message);
   return data;
@@ -103,8 +103,8 @@ export const useUpdateProduct = () => {
 
 // Delete a product
 const deleteProduct = async (product: Product) => {
-  if (product.imageUrl) {
-    await deleteImage(product.imageUrl);
+  if (product.image_url) {
+    await deleteImage(product.image_url);
   }
   const { error } = await supabase.from('products').delete().eq('id', product.id);
   if (error) throw new Error(error.message);

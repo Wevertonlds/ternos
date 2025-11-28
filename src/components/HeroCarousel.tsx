@@ -50,7 +50,7 @@ const HeroCarousel = () => {
             <div className="relative flex flex-col items-center justify-center min-h-screen bg-black text-white">
               <div
                 className="absolute inset-0 bg-cover bg-center opacity-40"
-                style={{ backgroundImage: `url('${banner.imageUrl}')` }}
+                style={{ backgroundImage: `url('${banner.image_url}')` }}
               ></div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
               <div className="relative z-10 text-center px-4 animate-fade-in">
