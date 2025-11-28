@@ -51,9 +51,19 @@ type AddProductParams = {
 };
 const addProduct = async ({ product, imageFile }: AddProductParams) => {
   const image_url = await uploadImage(imageFile);
-  const { data, error } = await supabase.from('products').insert([{ ...product, image_url }]).select();
+  
+  const newProductPayload = {
+    name: product.name,
+    brand: product.brand,
+    price: product.price,
+    category: product.category,
+    sizes: product.sizes,
+    image_url: image_url,
+  };
+
+  const { data, error } = await supabase.from('products').insert([newProductPayload]).select();
+
   if (error) {
-    // If DB insert fails, try to clean up the uploaded image
     await deleteImage(image_url);
     throw new Error(error.message);
   }

@@ -51,7 +51,17 @@ type AddBannerParams = {
 };
 const addBanner = async ({ banner, imageFile }: AddBannerParams) => {
   const image_url = await uploadImage(imageFile);
-  const { data, error } = await supabase.from('banners').insert([{ ...banner, image_url }]).select();
+  
+  const newBannerPayload = {
+    title: banner.title,
+    subtitle: banner.subtitle,
+    button_text: banner.button_text,
+    button_link: banner.button_link,
+    image_url: image_url,
+  };
+
+  const { data, error } = await supabase.from('banners').insert([newBannerPayload]).select();
+  
   if (error) {
     await deleteImage(image_url);
     throw new Error(error.message);
