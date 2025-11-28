@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { MoreHorizontal, Check, X, Clock, MessageCircle } from 'lucide-react';
+import { MoreHorizontal, Check, X, Clock, MessageCircle, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
-import { useScheduling, Appointment, AppointmentStatus } from '@/contexts/SchedulingContext';
+import { useAppointments, useBlockedDates, useToggleBlockDate, useUpdateAppointmentStatus } from '@/hooks/useAppointments';
+import { AppointmentStatus } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
@@ -17,33 +19,41 @@ const statusConfig: { [key in AppointmentStatus]: { variant: "secondary" | "defa
 };
 
 const AdminAppointmentsPage = () => {
-  const { appointments, blockedDates, toggleBlockDate, updateAppointmentStatus } = useScheduling();
+  const { data: appointments = [], isLoading: isLoadingAppointments } = useAppointments();
+  const { data: blockedDates = [], isLoading: isLoadingBlockedDates } = useBlockedDates();
+  const toggleBlockDateMutation = useToggleBlockDate();
+  const updateStatusMutation = useUpdateAppointmentStatus();
+  
   const [selectedDates, setSelectedDates] = useState<Date[] | undefined>([]);
 
   const handleToggleBlockDates = () => {
     if (selectedDates && selectedDates.length > 0) {
-      selectedDates.forEach(date => {
-        toggleBlockDate(date);
-      });
-      setSelectedDates([]); // Limpa a seleção após a ação
+      const promises = selectedDates.map(date => toggleBlockDateMutation.mutateAsync(date));
+      Promise.all(promises)
+        .then(() => {
+          toast.success(`${selectedDates.length} dia(s) foram atualizados.`);
+          setSelectedDates([]);
+        })
+        .catch((error) => toast.error(`Erro ao atualizar datas: ${error.message}`));
     }
+  };
+
+  const handleUpdateStatus = (id: number, status: AppointmentStatus) => {
+    updateStatusMutation.mutate({ id, status }, {
+      onSuccess: () => toast.success('Status do agendamento atualizado!'),
+      onError: (error) => toast.error(`Erro ao atualizar status: ${error.message}`),
+    });
   };
 
   const isDateBlocked = (d: Date) => blockedDates.some(bd => bd.toDateString() === d.toDateString());
 
   const getButtonText = () => {
-    if (!selectedDates || selectedDates.length === 0) {
-      return 'Selecione os dias';
-    }
+    if (!selectedDates || selectedDates.length === 0) return 'Selecione os dias';
     const allSelectedAreBlocked = selectedDates.every(isDateBlocked);
-    if (allSelectedAreBlocked) {
-      return `Desbloquear ${selectedDates.length} dia(s)`;
-    }
+    if (allSelectedAreBlocked) return `Desbloquear ${selectedDates.length} dia(s)`;
     const noneSelectedAreBlocked = !selectedDates.some(isDateBlocked);
-    if (noneSelectedAreBlocked) {
-      return `Bloquear ${selectedDates.length} dia(s)`;
-    }
-    return 'Inverter bloqueio dos dias selecionados';
+    if (noneSelectedAreBlocked) return `Bloquear ${selectedDates.length} dia(s)`;
+    return 'Inverter bloqueio';
   };
 
   const formatPhoneForLink = (phone: string) => {
@@ -53,6 +63,11 @@ const AdminAppointmentsPage = () => {
     }
     return cleaned;
   };
+
+  const sortedAppointments = useMemo(() => 
+    [...appointments].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+    [appointments]
+  );
 
   return (
     <div>
@@ -65,11 +80,12 @@ const AdminAppointmentsPage = () => {
               <CardDescription>Visualize e gerencie os agendamentos dos seus clientes.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {appointments.length > 0 ? (
-                  appointments
-                    .sort((a, b) => a.date.getTime() - b.date.getTime())
-                    .map((app) => {
+              {isLoadingAppointments ? (
+                <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>
+              ) : (
+                <div className="space-y-4">
+                  {sortedAppointments.length > 0 ? (
+                    sortedAppointments.map((app) => {
                       const whatsappLink = `https://wa.me/${formatPhoneForLink(app.phone)}`;
                       return (
                         <Card key={app.id}>
@@ -79,12 +95,12 @@ const AdminAppointmentsPage = () => {
                               <p className="text-sm text-muted-foreground">{app.address}</p>
                               <p className="text-sm text-muted-foreground">WhatsApp: {app.phone}</p>
                               <p className="text-sm font-semibold text-brand mt-1">
-                                {format(app.date, "'Dia' dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+                                {format(new Date(app.date), "'Dia' dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
                               </p>
                               <div className="mt-2">
                                 <p className="text-xs font-medium mb-1">Itens:</p>
                                 <div className="flex flex-wrap gap-2">
-                                  {app.fittingItems.map(item => (
+                                  {app.fitting_items.map(item => (
                                     <div key={item.fittingId} className="flex items-center bg-muted text-muted-foreground px-2 py-1 rounded-md text-xs">
                                       {item.name} ({item.selectedSize})
                                     </div>
@@ -107,9 +123,9 @@ const AdminAppointmentsPage = () => {
                                   <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
-                                  <DropdownMenuItem onClick={() => updateAppointmentStatus(app.id, 'Finalizado')}>Marcar como Finalizado</DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => updateAppointmentStatus(app.id, 'Cancelado')}>Marcar como Cancelado</DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => updateAppointmentStatus(app.id, 'Pendente')}>Marcar como Pendente</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Finalizado')}>Marcar como Finalizado</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Cancelado')}>Marcar como Cancelado</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Pendente')}>Marcar como Pendente</DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </div>
@@ -117,10 +133,11 @@ const AdminAppointmentsPage = () => {
                         </Card>
                       );
                     })
-                ) : (
-                  <p className="text-muted-foreground text-center py-8">Nenhum agendamento encontrado.</p>
-                )}
-              </div>
+                  ) : (
+                    <p className="text-muted-foreground text-center py-8">Nenhum agendamento encontrado.</p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -128,29 +145,30 @@ const AdminAppointmentsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Bloquear Agenda</CardTitle>
-              <CardDescription>Selecione um ou mais dias no calendário para torná-los indisponíveis para agendamento.</CardDescription>
+              <CardDescription>Selecione um ou mais dias para torná-los indisponíveis.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
-              <Calendar
-                mode="multiple"
-                selected={selectedDates}
-                onSelect={setSelectedDates}
-                className="rounded-md border"
-                locale={ptBR}
-                modifiers={{ blocked: blockedDates }}
-                modifiersStyles={{
-                  blocked: {
-                    backgroundColor: 'hsl(var(--destructive))',
-                    color: 'hsl(var(--destructive-foreground))',
-                    opacity: 0.8,
-                  },
-                }}
-              />
+              {isLoadingBlockedDates ? (
+                <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>
+              ) : (
+                <Calendar
+                  mode="multiple"
+                  selected={selectedDates}
+                  onSelect={setSelectedDates}
+                  className="rounded-md border"
+                  locale={ptBR}
+                  modifiers={{ blocked: blockedDates }}
+                  modifiersStyles={{
+                    blocked: { backgroundColor: 'hsl(var(--destructive))', color: 'hsl(var(--destructive-foreground))', opacity: 0.8 },
+                  }}
+                />
+              )}
               <Button 
                 onClick={handleToggleBlockDates} 
                 className="mt-4 w-full"
-                disabled={!selectedDates || selectedDates.length === 0}
+                disabled={!selectedDates || selectedDates.length === 0 || toggleBlockDateMutation.isPending}
               >
+                {toggleBlockDateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {getButtonText()}
               </Button>
             </CardContent>

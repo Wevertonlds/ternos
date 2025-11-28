@@ -1,11 +1,19 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Activity, Settings, Image, Package, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Activity, CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useScheduling } from '@/contexts/SchedulingContext';
+import { useAppointments } from '@/hooks/useAppointments';
 
 const AdminDashboardPage = () => {
-  const { appointments } = useScheduling();
+  const { data: appointments = [], isLoading } = useAppointments();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-12 w-12 animate-spin text-brand" />
+      </div>
+    );
+  }
 
   const totalAppointments = appointments.length;
   const pendingAppointments = appointments.filter(a => a.status === 'Pendente').length;

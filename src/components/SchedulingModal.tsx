@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar as CalendarIcon, Trash2, ShoppingBag } from 'lucide-react';
+import { Calendar as CalendarIcon, Trash2, ShoppingBag, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useFittingRoom } from '@/contexts/FittingRoomContext';
-import { useScheduling } from '@/contexts/SchedulingContext';
+import { useAddAppointment, useBlockedDates } from '@/hooks/useAppointments';
 import { cn } from '@/lib/utils';
 
 interface SchedulingModalProps {
@@ -34,7 +34,8 @@ const formSchema = z.object({
 
 const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) => {
   const { fittingItems, removeFittingItem } = useFittingRoom();
-  const { addAppointment, blockedDates } = useScheduling();
+  const { data: blockedDates = [], isLoading: isLoadingBlockedDates } = useBlockedDates();
+  const addAppointmentMutation = useAddAppointment();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,15 +48,21 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    addAppointment({
+    addAppointmentMutation.mutate({
       ...values,
-      fittingItems,
+      fitting_items: fittingItems,
+    }, {
+      onSuccess: () => {
+        toast.success('Agendamento realizado com sucesso!', {
+          description: `Entraremos em contato para confirmar sua visita em ${format(values.date, 'PPP', { locale: ptBR })}.`,
+        });
+        onClose();
+        form.reset();
+      },
+      onError: (error) => {
+        toast.error(`Erro ao agendar: ${error.message}`);
+      }
     });
-    toast.success('Agendamento realizado com sucesso!', {
-      description: `Entraremos em contato para confirmar sua visita em ${format(values.date, 'PPP', { locale: ptBR })}.`,
-    });
-    onClose();
-    form.reset();
   };
 
   const handleNavigateToProducts = () => {
@@ -122,17 +129,21 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
                           </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date < new Date(new Date().setDate(new Date().getDate() - 1)) ||
-                              blockedDates.some(d => d.toDateString() === date.toDateString())
-                            }
-                            initialFocus
-                            locale={ptBR}
-                          />
+                          {isLoadingBlockedDates ? (
+                             <div className="flex justify-center items-center p-4"><Loader2 className="h-6 w-6 animate-spin" /></div>
+                          ) : (
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) =>
+                                date < new Date(new Date().setDate(new Date().getDate() - 1)) ||
+                                blockedDates.some(d => d.toDateString() === date.toDateString())
+                              }
+                              initialFocus
+                              locale={ptBR}
+                            />
+                          )}
                         </PopoverContent>
                       </Popover>
                       <FormMessage />
@@ -179,7 +190,8 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
                   )}
                 />
                 <DialogFooter>
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={addAppointmentMutation.isPending}>
+                    {addAppointmentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Confirmar Agendamento
                   </Button>
                 </DialogFooter>

@@ -8,28 +8,39 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useSettings, useUpdateSettings } from '@/hooks/useSettings';
+import { Loader2 } from 'lucide-react';
+import { Settings } from '@/types';
 
 const settingsSchema = z.object({
-  siteName: z.string().min(3, 'O nome do site deve ter pelo menos 3 caracteres.'),
-  brandColor: z.string().regex(/^#([0-9a-f]{3}){1,2}$/i, 'Por favor, insira uma cor hexadecimal válida (ex: #F59E0B).'),
-  contactEmail: z.string().email('Por favor, insira um email válido.'),
-  contactPhone: z.string().min(10, 'Por favor, insira um telefone válido.'),
-  footerQuote: z.string().optional(),
+  site_name: z.string().min(3, 'O nome do site deve ter pelo menos 3 caracteres.'),
+  brand_color: z.string().regex(/^#([0-9a-f]{3}){1,2}$/i, 'Por favor, insira uma cor hexadecimal válida (ex: #F59E0B).'),
+  contact_email: z.string().email('Por favor, insira um email válido.'),
+  contact_phone: z.string().min(10, 'Por favor, insira um telefone válido.'),
+  footer_quote: z.string().optional(),
 });
 
 const AdminSettingsPage = () => {
+  const { data: settings, isLoading } = useSettings();
+  const updateSettingsMutation = useUpdateSettings();
+
   const form = useForm<z.infer<typeof settingsSchema>>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: {
-      siteName: 'La hermandad',
-      brandColor: '#D97706',
-      contactEmail: 'contato@lahermandad.com',
-      contactPhone: '(11) 99999-8888',
-      footerQuote: 'Gratidão não se paga com dinheiro, sim com atitudes! estamos juntos até depois do fim!',
-    },
   });
 
-  const brandColor = form.watch('brandColor');
+  useEffect(() => {
+    if (settings) {
+      form.reset({
+        site_name: settings.site_name,
+        brand_color: settings.brand_color,
+        contact_email: settings.contact_email,
+        contact_phone: settings.contact_phone,
+        footer_quote: settings.footer_quote,
+      });
+    }
+  }, [settings, form]);
+
+  const brandColor = form.watch('brand_color');
 
   useEffect(() => {
     if (brandColor) {
@@ -38,9 +49,23 @@ const AdminSettingsPage = () => {
   }, [brandColor]);
 
   const onSubmit = (values: z.infer<typeof settingsSchema>) => {
-    console.log('Salvando configurações:', values);
-    toast.success('Configurações salvas com sucesso!');
+    updateSettingsMutation.mutate(values, {
+      onSuccess: () => {
+        toast.success('Configurações salvas com sucesso!');
+      },
+      onError: (error) => {
+        toast.error(`Erro ao salvar: ${error.message}`);
+      },
+    });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-12 w-12 animate-spin text-brand" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -55,7 +80,7 @@ const AdminSettingsPage = () => {
             <CardContent className="space-y-4">
               <FormField
                 control={form.control}
-                name="siteName"
+                name="site_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nome do Site</FormLabel>
@@ -68,7 +93,7 @@ const AdminSettingsPage = () => {
               />
               <FormField
                 control={form.control}
-                name="brandColor"
+                name="brand_color"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cor Principal (Hex)</FormLabel>
@@ -93,7 +118,7 @@ const AdminSettingsPage = () => {
             <CardContent className="space-y-4">
               <FormField
                 control={form.control}
-                name="contactEmail"
+                name="contact_email"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email de Contato</FormLabel>
@@ -106,7 +131,7 @@ const AdminSettingsPage = () => {
               />
               <FormField
                 control={form.control}
-                name="contactPhone"
+                name="contact_phone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Telefone de Contato</FormLabel>
@@ -119,7 +144,7 @@ const AdminSettingsPage = () => {
               />
               <FormField
                 control={form.control}
-                name="footerQuote"
+                name="footer_quote"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Citação do Rodapé</FormLabel>
@@ -133,7 +158,10 @@ const AdminSettingsPage = () => {
             </CardContent>
           </Card>
 
-          <Button type="submit">Salvar Alterações</Button>
+          <Button type="submit" disabled={updateSettingsMutation.isPending}>
+            {updateSettingsMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Salvar Alterações
+          </Button>
         </form>
       </Form>
     </div>
