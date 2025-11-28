@@ -18,9 +18,15 @@ const bannerSchema = z.object({
   id: z.number().optional(),
   title: z.string().min(1, 'O título é obrigatório.'),
   subtitle: z.string().min(1, 'O subtítulo é obrigatório.'),
-  imageUrl: z.string().url('Por favor, insira uma URL de imagem válida.'),
+  imageUrl: z.string().optional(),
+  imageFile: z.any().optional(),
   buttonText: z.string().min(1, 'O texto do botão é obrigatório.'),
   buttonLink: z.string().min(1, 'O link do botão é obrigatório.'),
+}).refine(data => {
+  return data.id || (data.imageFile && data.imageFile.length > 0);
+}, {
+  message: 'A imagem do banner é obrigatória.',
+  path: ['imageFile'],
 });
 
 type BannerFormData = z.infer<typeof bannerSchema>;
@@ -33,7 +39,8 @@ const AdminBannersPage = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
-  const [deletingBannerId, setDeletingBannerId] = useState<number | null>(null);
+  const [deletingBanner, setDeletingBanner] = useState<Banner | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const form = useForm<BannerFormData>({
     resolver: zodResolver(bannerSchema),
@@ -48,30 +55,34 @@ const AdminBannersPage = () => {
 
   const handleAddNew = () => {
     setEditingBanner(null);
-    form.reset({ title: '', subtitle: '', imageUrl: '', buttonText: '', buttonLink: '' });
+    setImagePreview(null);
+    form.reset({ title: '', subtitle: '', imageUrl: '', imageFile: undefined, buttonText: '', buttonLink: '' });
     setIsDialogOpen(true);
   };
 
   const handleEdit = (banner: Banner) => {
     setEditingBanner(banner);
-    form.reset(banner);
+    setImagePreview(banner.imageUrl);
+    form.reset({ ...banner, imageFile: undefined });
     setIsDialogOpen(true);
   };
 
   const handleDeleteConfirm = () => {
-    if (deletingBannerId === null) return;
-    deleteBannerMutation.mutate(deletingBannerId, {
+    if (!deletingBanner) return;
+    deleteBannerMutation.mutate(deletingBanner, {
       onSuccess: () => {
         toast.success('Banner removido com sucesso!');
-        setDeletingBannerId(null);
+        setDeletingBanner(null);
       },
       onError: (err: any) => {
         toast.error(`Erro ao remover banner: ${err.message}`);
+        setDeletingBanner(null);
       },
     });
   };
 
   const onSubmit = (values: BannerFormData) => {
+    const imageFile = values.imageFile?.[0];
     const mutationOptions = {
       onSuccess: () => {
         toast.success(`Banner ${editingBanner ? 'atualizado' : 'adicionado'} com sucesso!`);
@@ -83,10 +94,12 @@ const AdminBannersPage = () => {
     };
 
     if (editingBanner) {
-      updateBannerMutation.mutate({ ...values, id: editingBanner.id }, mutationOptions);
+      const { imageFile: _i, imageUrl: _u, ...bannerData } = values;
+      const updatedBanner = { ...bannerData, id: editingBanner.id, imageUrl: editingBanner.imageUrl };
+      updateBannerMutation.mutate({ banner: updatedBanner, imageFile }, mutationOptions);
     } else {
-      const { id, ...newBannerData } = values;
-      addBannerMutation.mutate(newBannerData as Omit<Banner, 'id' | 'created_at'>, mutationOptions);
+      const { id, imageUrl, imageFile: _i, ...newBannerData } = values;
+      addBannerMutation.mutate({ banner: newBannerData as any, imageFile }, mutationOptions);
     }
   };
 
@@ -108,7 +121,7 @@ const AdminBannersPage = () => {
         <h1 className="text-3xl font-bold font-display">Gerenciar Banners</h1>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleAddNew} disabled={banners.length >= 4}>
+            <Button onClick={handleAddNew}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Adicionar Banner
             </Button>
@@ -119,13 +132,34 @@ const AdminBannersPage = () => {
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-                <FormField control={form.control} name="imageUrl" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL da Imagem</FormLabel>
-                    <FormControl><Input placeholder="https://exemplo.com/imagem.jpg" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                <FormField
+                  control={form.control}
+                  name="imageFile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Imagem do Banner</FormLabel>
+                      {imagePreview && <img src={imagePreview} alt="Preview" className="w-full h-32 object-cover rounded-md my-2" />}
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              field.onChange(e.target.files);
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setImagePreview(reader.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField control={form.control} name="title" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Título</FormLabel>
@@ -187,9 +221,9 @@ const AdminBannersPage = () => {
                 <Button variant="outline" size="sm" onClick={() => handleEdit(banner)}>
                   <Edit className="mr-2 h-4 w-4" /> Editar
                 </Button>
-                <AlertDialog open={deletingBannerId === banner.id} onOpenChange={(open) => !open && setDeletingBannerId(null)}>
+                <AlertDialog open={deletingBanner === banner} onOpenChange={(open) => !open && setDeletingBanner(null)}>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm" onClick={() => setDeletingBannerId(banner.id)}>
+                    <Button variant="destructive" size="sm" onClick={() => setDeletingBanner(banner)}>
                       <Trash2 className="mr-2 h-4 w-4" /> Excluir
                     </Button>
                   </AlertDialogTrigger>
@@ -197,11 +231,11 @@ const AdminBannersPage = () => {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Essa ação não pode ser desfeita. Isso excluirá permanentemente o banner.
+                        Essa ação não pode ser desfeita. Isso excluirá permanentemente o banner e sua imagem.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogCancel onClick={() => setDeletingBanner(null)}>Cancelar</AlertDialogCancel>
                       <AlertDialogAction onClick={handleDeleteConfirm} disabled={deleteBannerMutation.isPending}>
                         {deleteBannerMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Continuar
