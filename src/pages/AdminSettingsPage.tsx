@@ -26,16 +26,23 @@ const AdminSettingsPage = () => {
 
   const form = useForm<z.infer<typeof settingsSchema>>({
     resolver: zodResolver(settingsSchema),
+    defaultValues: {
+      site_name: '',
+      brand_color: '',
+      contact_email: '',
+      contact_phone: '',
+      footer_quote: '',
+    },
   });
 
   useEffect(() => {
     if (settings) {
       form.reset({
-        site_name: settings.site_name,
-        brand_color: settings.brand_color,
-        contact_email: settings.contact_email,
-        contact_phone: settings.contact_phone,
-        footer_quote: settings.footer_quote,
+        site_name: settings.site_name || '',
+        brand_color: settings.brand_color || '',
+        contact_email: settings.contact_email || '',
+        contact_phone: settings.contact_phone || '',
+        footer_quote: settings.footer_quote || '',
       });
     }
   }, [settings, form]);

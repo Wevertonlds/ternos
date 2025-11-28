@@ -71,7 +71,14 @@ const AdminBannersPage = () => {
   const handleEdit = (banner: Banner) => {
     setEditingBanner(banner);
     setImagePreview(banner.imageUrl);
-    form.reset({ ...banner, imageFile: undefined });
+    form.reset({
+      ...banner,
+      title: banner.title || '',
+      subtitle: banner.subtitle || '',
+      buttonText: banner.buttonText || '',
+      buttonLink: banner.buttonLink || '',
+      imageFile: undefined,
+    });
     setIsDialogOpen(true);
   };
 

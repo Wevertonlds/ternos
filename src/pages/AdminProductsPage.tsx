@@ -54,6 +54,13 @@ const AdminProductsPage = () => {
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: '',
+      brand: '',
+      price: 0,
+      category: 'Terno',
+      sizes: '',
+    },
   });
 
   const handleAddNew = () => {
@@ -76,6 +83,8 @@ const AdminProductsPage = () => {
     setImagePreview(product.imageUrl);
     form.reset({
       ...product,
+      name: product.name || '',
+      brand: product.brand || '',
       sizes: product.sizes.join(', '),
       imageFile: undefined,
     });
