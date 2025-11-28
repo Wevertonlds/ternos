@@ -19,6 +19,7 @@ const settingsSchema = z.object({
   contact_phone: z.string().min(10, 'Por favor, insira um telefone válido.'),
   footer_description: z.string().optional(),
   footer_quote: z.string().optional(),
+  footer_signature: z.string().optional(),
 });
 
 const AdminSettingsPage = () => {
@@ -34,6 +35,7 @@ const AdminSettingsPage = () => {
       contact_phone: '',
       footer_description: '',
       footer_quote: '',
+      footer_signature: '',
     },
   });
 
@@ -46,6 +48,7 @@ const AdminSettingsPage = () => {
         contact_phone: settings.contact_phone || '',
         footer_description: settings.footer_description || '',
         footer_quote: settings.footer_quote || '',
+        footer_signature: settings.footer_signature || '',
       });
     }
   }, [settings, form]);
@@ -173,6 +176,19 @@ const AdminSettingsPage = () => {
                     <FormLabel>Citação do Rodapé</FormLabel>
                     <FormControl>
                       <Textarea placeholder="Sua citação aqui..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="footer_signature"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assinatura da Citação</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ebenezer" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

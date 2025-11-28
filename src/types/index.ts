@@ -35,6 +35,7 @@ export interface Settings {
   contact_phone: string;
   footer_quote?: string;
   footer_description?: string;
+  footer_signature?: string;
 }
 
 export interface Banner {

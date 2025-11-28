@@ -74,9 +74,11 @@ const Footer = () => {
               <p className="text-brand/75 text-xs italic">
                 "{settings.footer_quote}"
               </p>
-              <p className="text-brand/75 text-xs font-semibold mt-1">
-                - A glória é para Deus
-              </p>
+              {settings.footer_signature && (
+                <p className="text-brand/75 text-xs font-semibold mt-1">
+                  {settings.footer_signature}
+                </p>
+              )}
             </div>
           )}
         </div>
