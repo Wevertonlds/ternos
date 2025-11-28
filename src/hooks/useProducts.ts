@@ -85,7 +85,7 @@ const updateProduct = async ({ product, imageFile }: UpdateProductParams) => {
     imageUrl = await uploadImage(imageFile);
   }
 
-  const { id, ...updates } = { ...product, imageUrl };
+  const { id, created_at, ...updates } = { ...product, imageUrl };
   const { data, error } = await supabase.from('products').update(updates).eq('id', id).select();
   if (error) throw new Error(error.message);
   return data;

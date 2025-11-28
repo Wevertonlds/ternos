@@ -84,7 +84,7 @@ const updateBanner = async ({ banner, imageFile }: UpdateBannerParams) => {
     imageUrl = await uploadImage(imageFile);
   }
 
-  const { id, ...updates } = { ...banner, imageUrl };
+  const { id, created_at, ...updates } = { ...banner, imageUrl };
   const { data, error } = await supabase.from('banners').update(updates).eq('id', id).select();
   if (error) throw new Error(error.message);
   return data;
