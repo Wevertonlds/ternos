@@ -10,6 +10,7 @@ interface FittingRoomContextType {
   fittingItems: FittingItem[];
   addFittingItem: (item: Product, size: string) => void;
   removeFittingItem: (fittingId: string) => void;
+  clearFittingRoom: () => void;
 }
 
 const FittingRoomContext = createContext<FittingRoomContextType | undefined>(undefined);
@@ -32,8 +33,12 @@ export const FittingRoomProvider = ({ children }: { children: ReactNode }) => {
     setFittingItems((prevItems) => prevItems.filter((item) => item.fittingId !== fittingId));
   };
 
+  const clearFittingRoom = () => {
+    setFittingItems([]);
+  };
+
   return (
-    <FittingRoomContext.Provider value={{ fittingItems, addFittingItem, removeFittingItem }}>
+    <FittingRoomContext.Provider value={{ fittingItems, addFittingItem, removeFittingItem, clearFittingRoom }}>
       {children}
     </FittingRoomContext.Provider>
   );

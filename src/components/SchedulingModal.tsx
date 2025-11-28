@@ -33,7 +33,7 @@ const formSchema = z.object({
 });
 
 const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) => {
-  const { fittingItems, removeFittingItem } = useFittingRoom();
+  const { fittingItems, removeFittingItem, clearFittingRoom } = useFittingRoom();
   const { data: blockedDates = [], isLoading: isLoadingBlockedDates } = useBlockedDates();
   const addAppointmentMutation = useAddAppointment();
   const navigate = useNavigate();
@@ -58,6 +58,7 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
         });
         onClose();
         form.reset();
+        clearFittingRoom();
       },
       onError: (error) => {
         toast.error(`Erro ao agendar: ${error.message}`);
