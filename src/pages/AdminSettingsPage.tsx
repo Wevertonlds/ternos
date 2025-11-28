@@ -17,6 +17,7 @@ const settingsSchema = z.object({
   brand_color: z.string().regex(/^#([0-9a-f]{3}){1,2}$/i, 'Por favor, insira uma cor hexadecimal válida (ex: #F59E0B).'),
   contact_email: z.string().email('Por favor, insira um email válido.'),
   contact_phone: z.string().min(10, 'Por favor, insira um telefone válido.'),
+  footer_description: z.string().optional(),
   footer_quote: z.string().optional(),
 });
 
@@ -31,6 +32,7 @@ const AdminSettingsPage = () => {
       brand_color: '',
       contact_email: '',
       contact_phone: '',
+      footer_description: '',
       footer_quote: '',
     },
   });
@@ -42,6 +44,7 @@ const AdminSettingsPage = () => {
         brand_color: settings.brand_color || '',
         contact_email: settings.contact_email || '',
         contact_phone: settings.contact_phone || '',
+        footer_description: settings.footer_description || '',
         footer_quote: settings.footer_quote || '',
       });
     }
@@ -144,6 +147,19 @@ const AdminSettingsPage = () => {
                     <FormLabel>Telefone de Contato</FormLabel>
                     <FormControl>
                       <Input placeholder="(XX) XXXXX-XXXX" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="footer_description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descrição do Rodapé</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Elegância que vem até você..." {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -42,7 +42,7 @@ const Footer = () => {
               <span className="text-brand">{siteNameFirstWord}</span> {siteNameRest}
             </h3>
             <p className="mt-4 text-background/70 max-w-sm">
-              Elegância que vem até você. Oferecemos uma curadoria de moda masculina com a conveniência de um atendimento personalizado em domicílio.
+              {settings.footer_description || 'Elegância que vem até você. Oferecemos uma curadoria de moda masculina com a conveniência de um atendimento personalizado em domicílio.'}
             </p>
           </div>
           <div>
