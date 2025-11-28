@@ -10,6 +10,7 @@ import AdminSettingsPage from './pages/AdminSettingsPage';
 import AdminBannersPage from './pages/AdminBannersPage';
 import AdminProductsPage from './pages/AdminProductsPage';
 import AdminAppointmentsPage from './pages/AdminAppointmentsPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -31,12 +32,14 @@ function App() {
 
         {/* Rotas de Admin */}
         <Route path="/admin" element={<AdminLoginPage />} />
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-          <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
-          <Route path="/admin/settings" element={<AdminSettingsPage />} />
-          <Route path="/admin/banners" element={<AdminBannersPage />} />
-          <Route path="/admin/products" element={<AdminProductsPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
+            <Route path="/admin/settings" element={<AdminSettingsPage />} />
+            <Route path="/admin/banners" element={<AdminBannersPage />} />
+            <Route path="/admin/products" element={<AdminProductsPage />} />
+          </Route>
         </Route>
       </Routes>
     </Router>

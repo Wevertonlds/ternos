@@ -2,13 +2,21 @@ import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Settings, Image, Package, LogOut, Calendar, Menu } from 'lucide-react';
 import { Button } from './ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { signOut } = useAuth();
 
-  const handleLogout = () => {
-    navigate('/admin');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/admin');
+    } catch (error) {
+      toast.error('Erro ao sair.');
+    }
   };
 
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>

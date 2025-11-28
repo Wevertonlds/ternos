@@ -1,26 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Lock, Mail } from 'lucide-react';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Lock, Mail, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+
+const loginSchema = z.object({
+  email: z.string().email({ message: 'Por favor, insira um email válido.' }),
+  password: z.string().min(1, { message: 'A senha é obrigatória.' }),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 const AdminLoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { session } = useAuth();
 
-  const handleLogin = () => {
-    if (email === 'admin@admin' && password === 'admin123') {
-      toast.success('Login bem-sucedido!');
-      setTimeout(() => {
-        navigate('/admin/dashboard');
-      }, 1000);
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  useEffect(() => {
+    if (session) {
+      navigate('/admin/dashboard');
+    }
+  }, [session, navigate]);
+
+  const handleLogin = async (data: LoginFormValues) => {
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
+    setIsLoading(false);
+
+    if (error) {
+      toast.error(error.message || 'Credenciais inválidas. Tente novamente.');
     } else {
-      toast.error('Credenciais inválidas. Tente novamente.');
+      toast.success('Login bem-sucedido!');
+      // The onAuthStateChange listener will trigger the redirect
     }
   };
 
@@ -35,41 +66,50 @@ const AdminLoginPage = () => {
             </CardTitle>
             <CardDescription>Acesse para gerenciar os agendamentos.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@admin"
-                  className="pl-10"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleLogin)}>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <FormControl>
+                          <Input type="email" placeholder="seu@email.com" className="pl-10" {...field} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="admin123"
-                  className="pl-10"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Senha</FormLabel>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <FormControl>
+                          <Input type="password" placeholder="••••••••" className="pl-10" {...field} />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col">
-            <Button onClick={handleLogin} className="w-full bg-brand hover:bg-brand/90 text-brand-foreground">
-              Entrar
-            </Button>
-          </CardFooter>
+              </CardContent>
+              <CardFooter className="flex flex-col">
+                <Button type="submit" disabled={isLoading} className="w-full bg-brand hover:bg-brand/90 text-brand-foreground">
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Entrar
+                </Button>
+              </CardFooter>
+            </form>
+          </Form>
         </Card>
       </div>
     </>
