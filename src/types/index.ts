@@ -40,8 +40,8 @@ export interface Banner {
   id: number;
   title: string;
   subtitle: string;
-  image_url: string;
-  button_text: string;
-  button_link: string;
+  imageUrl: string;
+  buttonText: string;
+  buttonLink: string;
   created_at?: string;
 }

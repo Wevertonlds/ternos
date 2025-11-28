@@ -16,13 +16,12 @@ import { useBanners, useAddBanner, useUpdateBanner, useDeleteBanner } from '@/ho
 
 const bannerSchema = z.object({
   id: z.number().optional(),
-  title_line_1: z.string().min(1, 'A primeira linha do título é obrigatória.'),
-  title_line_2: z.string().optional(),
+  title: z.string().min(1, 'O título é obrigatório.'),
   subtitle: z.string().min(1, 'O subtítulo é obrigatório.'),
-  image_url: z.string().optional(),
+  imageUrl: z.string().optional(),
   imageFile: z.any().optional(),
-  button_text: z.string().min(1, 'O texto do botão é obrigatório.'),
-  button_link: z.string().min(1, 'O link do botão é obrigatório.'),
+  buttonText: z.string().min(1, 'O texto do botão é obrigatório.'),
+  buttonLink: z.string().min(1, 'O link do botão é obrigatório.'),
 }).refine(data => {
   return data.id || (data.imageFile && data.imageFile.length > 0);
 }, {
@@ -46,12 +45,11 @@ const AdminBannersPage = () => {
   const form = useForm<BannerFormData>({
     resolver: zodResolver(bannerSchema),
     defaultValues: {
-      title_line_1: '',
-      title_line_2: '',
+      title: '',
       subtitle: '',
-      image_url: '',
-      button_text: '',
-      button_link: '',
+      imageUrl: '',
+      buttonText: '',
+      buttonLink: '',
       imageFile: undefined,
     },
   });
@@ -60,29 +58,26 @@ const AdminBannersPage = () => {
     setEditingBanner(null);
     setImagePreview(null);
     form.reset({ 
-      title_line_1: '',
-      title_line_2: '',
+      title: '', 
       subtitle: '', 
-      image_url: '',
+      imageUrl: '',
       imageFile: undefined, 
-      button_text: '', 
-      button_link: '' 
+      buttonText: '', 
+      buttonLink: '' 
     });
     setIsDialogOpen(true);
   };
 
   const handleEdit = (banner: Banner) => {
     setEditingBanner(banner);
-    setImagePreview(banner.image_url);
-    const [line1 = '', line2 = ''] = banner.title.split('<br />');
+    setImagePreview(banner.imageUrl);
     form.reset({
       id: banner.id,
-      title_line_1: line1,
-      title_line_2: line2,
+      title: banner.title || '',
       subtitle: banner.subtitle || '',
-      image_url: banner.image_url,
-      button_text: banner.button_text || '',
-      button_link: banner.button_link || '',
+      imageUrl: banner.imageUrl,
+      buttonText: banner.buttonText || '',
+      buttonLink: banner.buttonLink || '',
       imageFile: undefined,
     });
     setIsDialogOpen(true);
@@ -114,26 +109,22 @@ const AdminBannersPage = () => {
       },
     };
 
-    const finalTitle = values.title_line_2 
-      ? `${values.title_line_1}<br />${values.title_line_2}` 
-      : values.title_line_1;
-
     if (editingBanner) {
       const bannerToUpdate: Omit<Banner, 'created_at'> = {
         id: editingBanner.id,
-        title: finalTitle,
+        title: values.title,
         subtitle: values.subtitle,
-        button_text: values.button_text,
-        button_link: values.button_link,
-        image_url: editingBanner.image_url, // Pass original URL for potential deletion
+        buttonText: values.buttonText,
+        buttonLink: values.buttonLink,
+        imageUrl: editingBanner.imageUrl,
       };
       updateBannerMutation.mutate({ banner: bannerToUpdate, imageFile }, mutationOptions);
     } else {
-      const bannerToAdd: Omit<Banner, 'id' | 'created_at' | 'image_url'> = {
-        title: finalTitle,
+      const bannerToAdd: Omit<Banner, 'id' | 'created_at' | 'imageUrl'> = {
+        title: values.title,
         subtitle: values.subtitle,
-        button_text: values.button_text,
-        button_link: values.button_link,
+        buttonText: values.buttonText,
+        buttonLink: values.buttonLink,
       };
       addBannerMutation.mutate({ banner: bannerToAdd, imageFile }, mutationOptions);
     }
@@ -199,17 +190,10 @@ const AdminBannersPage = () => {
                     </FormItem>
                   )}
                 />
-                <FormField control={form.control} name="title_line_1" render={({ field }) => (
+                <FormField control={form.control} name="title" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Título (Linha 1)</FormLabel>
-                    <FormControl><Input placeholder="Primeira linha do título" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="title_line_2" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Título (Linha 2 - Opcional)</FormLabel>
-                    <FormControl><Input placeholder="Segunda linha do título" {...field} /></FormControl>
+                    <FormLabel>Título</FormLabel>
+                    <FormControl><Textarea placeholder="Use <br /> para quebra de linha" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
@@ -220,14 +204,14 @@ const AdminBannersPage = () => {
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="button_text" render={({ field }) => (
+                <FormField control={form.control} name="buttonText" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Texto do Botão</FormLabel>
                     <FormControl><Input placeholder="Ex: Ver Coleção" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="button_link" render={({ field }) => (
+                <FormField control={form.control} name="buttonLink" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Link do Botão</FormLabel>
                     <FormControl><Input placeholder="Ex: /products" {...field} /></FormControl>
@@ -257,7 +241,7 @@ const AdminBannersPage = () => {
           {banners.map((banner) => (
             <Card key={banner.id} className="overflow-hidden">
               <CardHeader className="p-0">
-                <img src={banner.image_url} alt="Preview" className="w-full h-40 object-cover" />
+                <img src={banner.imageUrl} alt="Preview" className="w-full h-40 object-cover" />
               </CardHeader>
               <CardContent className="p-4">
                 <CardTitle className="text-lg" dangerouslySetInnerHTML={{ __html: banner.title.replace(/<span class="text-brand">/g, '<span class="text-orange-500">') }} />

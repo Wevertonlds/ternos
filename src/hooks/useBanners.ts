@@ -18,10 +18,10 @@ const uploadImage = async (file: File): Promise<string> => {
 };
 
 // Helper to delete image from storage
-const deleteImage = async (image_url: string) => {
-  if (!image_url) return;
+const deleteImage = async (imageUrl: string) => {
+  if (!imageUrl) return;
   try {
-    const imagePath = new URL(image_url).pathname.split('/banner-images/')[1];
+    const imagePath = new URL(imageUrl).pathname.split('/banner-images/')[1];
     if (imagePath) {
       await supabase.storage.from('banner-images').remove([imagePath]);
     }
@@ -46,24 +46,24 @@ export const useBanners = () => {
 
 // Add a new banner
 type AddBannerParams = {
-  banner: Omit<Banner, 'id' | 'created_at' | 'image_url'>;
+  banner: Omit<Banner, 'id' | 'created_at' | 'imageUrl'>;
   imageFile: File;
 };
 const addBanner = async ({ banner, imageFile }: AddBannerParams) => {
-  const image_url = await uploadImage(imageFile);
+  const imageUrl = await uploadImage(imageFile);
   
   const newBannerPayload = {
     title: banner.title,
     subtitle: banner.subtitle,
-    button_text: banner.button_text,
-    button_link: banner.button_link,
-    image_url: image_url,
+    buttonText: banner.buttonText,
+    buttonLink: banner.buttonLink,
+    imageUrl: imageUrl,
   };
 
   const { data, error } = await supabase.from('banners').insert([newBannerPayload]).select();
   
   if (error) {
-    await deleteImage(image_url);
+    await deleteImage(imageUrl);
     throw new Error(error.message);
   }
   return data;
@@ -85,21 +85,21 @@ type UpdateBannerParams = {
   imageFile?: File;
 };
 const updateBanner = async ({ banner, imageFile }: UpdateBannerParams) => {
-  let final_image_url = banner.image_url;
+  let final_imageUrl = banner.imageUrl;
 
   if (imageFile) {
-    if (banner.image_url) {
-      await deleteImage(banner.image_url);
+    if (banner.imageUrl) {
+      await deleteImage(banner.imageUrl);
     }
-    final_image_url = await uploadImage(imageFile);
+    final_imageUrl = await uploadImage(imageFile);
   }
 
   const updatesPayload = {
     title: banner.title,
     subtitle: banner.subtitle,
-    button_text: banner.button_text,
-    button_link: banner.button_link,
-    image_url: final_image_url,
+    buttonText: banner.buttonText,
+    buttonLink: banner.buttonLink,
+    imageUrl: final_imageUrl,
   };
 
   const { data, error } = await supabase
@@ -124,8 +124,8 @@ export const useUpdateBanner = () => {
 
 // Delete a banner
 const deleteBanner = async (banner: Banner) => {
-  if (banner.image_url) {
-    await deleteImage(banner.image_url);
+  if (banner.imageUrl) {
+    await deleteImage(banner.imageUrl);
   }
   const { error } = await supabase.from('banners').delete().eq('id', banner.id);
   if (error) throw new Error(error.message);
