@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PlusCircle, Edit, Trash2, Loader2 } from 'lucide-react';
 import { Banner } from '@/types';
@@ -47,16 +47,22 @@ const AdminBannersPage = () => {
     defaultValues: {
       title: '',
       subtitle: '',
-      imageUrl: '',
       buttonText: '',
       buttonLink: '',
+      imageFile: undefined,
     },
   });
 
   const handleAddNew = () => {
     setEditingBanner(null);
     setImagePreview(null);
-    form.reset({ title: '', subtitle: '', imageUrl: '', imageFile: undefined, buttonText: '', buttonLink: '' });
+    form.reset({ 
+      title: '', 
+      subtitle: '', 
+      imageFile: undefined, 
+      buttonText: '', 
+      buttonLink: '' 
+    });
     setIsDialogOpen(true);
   };
 
@@ -129,6 +135,9 @@ const AdminBannersPage = () => {
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>{editingBanner ? 'Editar Banner' : 'Adicionar Novo Banner'}</DialogTitle>
+              <DialogDescription>
+                Preencha as informações abaixo para criar ou atualizar um banner.
+              </DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
