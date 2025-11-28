@@ -26,7 +26,7 @@ interface NewAppointmentData {
 }
 
 const addAppointment = async (appointmentData: NewAppointmentData) => {
-  const { data, error } = await supabase.from('appointments').insert([appointmentData]).select();
+  const { data, error } = await supabase.from('appointments').insert([appointmentData]);
   if (error) throw new Error(error.message);
   return data;
 };
