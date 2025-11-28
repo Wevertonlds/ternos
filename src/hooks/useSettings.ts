@@ -17,7 +17,11 @@ export const useSettings = () => {
 };
 
 const updateSettings = async (settings: Omit<Settings, 'id'>) => {
-  const { data, error } = await supabase.from('settings').update(settings).eq('id', 1).select();
+  const { data, error } = await supabase
+    .from('settings')
+    .upsert({ id: 1, ...settings })
+    .select()
+    .single();
   if (error) throw new Error(error.message);
   return data;
 };
