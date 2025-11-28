@@ -75,17 +75,29 @@ type UpdateBannerParams = {
   imageFile?: File;
 };
 const updateBanner = async ({ banner, imageFile }: UpdateBannerParams) => {
-  let image_url = banner.image_url;
+  let final_image_url = banner.image_url;
 
   if (imageFile) {
     if (banner.image_url) {
       await deleteImage(banner.image_url);
     }
-    image_url = await uploadImage(imageFile);
+    final_image_url = await uploadImage(imageFile);
   }
 
-  const { id, created_at, ...updates } = { ...banner, image_url };
-  const { data, error } = await supabase.from('banners').update(updates).eq('id', id).select();
+  const updatesPayload = {
+    title: banner.title,
+    subtitle: banner.subtitle,
+    button_text: banner.button_text,
+    button_link: banner.button_link,
+    image_url: final_image_url,
+  };
+
+  const { data, error } = await supabase
+    .from('banners')
+    .update(updatesPayload)
+    .eq('id', banner.id)
+    .select();
+    
   if (error) throw new Error(error.message);
   return data;
 };

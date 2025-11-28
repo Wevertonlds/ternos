@@ -76,17 +76,30 @@ type UpdateProductParams = {
   imageFile?: File;
 };
 const updateProduct = async ({ product, imageFile }: UpdateProductParams) => {
-  let image_url = product.image_url;
+  let final_image_url = product.image_url;
 
   if (imageFile) {
     if (product.image_url) {
       await deleteImage(product.image_url);
     }
-    image_url = await uploadImage(imageFile);
+    final_image_url = await uploadImage(imageFile);
   }
 
-  const { id, created_at, ...updates } = { ...product, image_url };
-  const { data, error } = await supabase.from('products').update(updates).eq('id', id).select();
+  const updatesPayload = {
+    name: product.name,
+    brand: product.brand,
+    price: product.price,
+    category: product.category,
+    sizes: product.sizes,
+    image_url: final_image_url,
+  };
+
+  const { data, error } = await supabase
+    .from('products')
+    .update(updatesPayload)
+    .eq('id', product.id)
+    .select();
+
   if (error) throw new Error(error.message);
   return data;
 };
