@@ -16,7 +16,8 @@ import { useBanners, useAddBanner, useUpdateBanner, useDeleteBanner } from '@/ho
 
 const bannerSchema = z.object({
   id: z.number().optional(),
-  title: z.string().min(1, 'O título é obrigatório.'),
+  title_line_1: z.string().min(1, 'A primeira linha do título é obrigatória.'),
+  title_line_2: z.string().optional(),
   subtitle: z.string().min(1, 'O subtítulo é obrigatório.'),
   image_url: z.string().optional(),
   imageFile: z.any().optional(),
@@ -45,7 +46,8 @@ const AdminBannersPage = () => {
   const form = useForm<BannerFormData>({
     resolver: zodResolver(bannerSchema),
     defaultValues: {
-      title: '',
+      title_line_1: '',
+      title_line_2: '',
       subtitle: '',
       image_url: '',
       button_text: '',
@@ -58,7 +60,8 @@ const AdminBannersPage = () => {
     setEditingBanner(null);
     setImagePreview(null);
     form.reset({ 
-      title: '', 
+      title_line_1: '',
+      title_line_2: '',
       subtitle: '', 
       image_url: '',
       imageFile: undefined, 
@@ -71,9 +74,11 @@ const AdminBannersPage = () => {
   const handleEdit = (banner: Banner) => {
     setEditingBanner(banner);
     setImagePreview(banner.image_url);
+    const [line1 = '', line2 = ''] = banner.title.split('<br />');
     form.reset({
       id: banner.id,
-      title: banner.title || '',
+      title_line_1: line1,
+      title_line_2: line2,
       subtitle: banner.subtitle || '',
       image_url: banner.image_url,
       button_text: banner.button_text || '',
@@ -109,10 +114,14 @@ const AdminBannersPage = () => {
       },
     };
 
+    const finalTitle = values.title_line_2 
+      ? `${values.title_line_1}<br />${values.title_line_2}` 
+      : values.title_line_1;
+
     if (editingBanner) {
       const bannerToUpdate: Omit<Banner, 'created_at'> = {
         id: editingBanner.id,
-        title: values.title,
+        title: finalTitle,
         subtitle: values.subtitle,
         button_text: values.button_text,
         button_link: values.button_link,
@@ -121,7 +130,7 @@ const AdminBannersPage = () => {
       updateBannerMutation.mutate({ banner: bannerToUpdate, imageFile }, mutationOptions);
     } else {
       const bannerToAdd: Omit<Banner, 'id' | 'created_at' | 'image_url'> = {
-        title: values.title,
+        title: finalTitle,
         subtitle: values.subtitle,
         button_text: values.button_text,
         button_link: values.button_link,
@@ -190,10 +199,17 @@ const AdminBannersPage = () => {
                     </FormItem>
                   )}
                 />
-                <FormField control={form.control} name="title" render={({ field }) => (
+                <FormField control={form.control} name="title_line_1" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Título</FormLabel>
-                    <FormControl><Textarea placeholder="Título do banner (use <br /> para quebra de linha)" {...field} /></FormControl>
+                    <FormLabel>Título (Linha 1)</FormLabel>
+                    <FormControl><Input placeholder="Primeira linha do título" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="title_line_2" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Título (Linha 2 - Opcional)</FormLabel>
+                    <FormControl><Input placeholder="Segunda linha do título" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
