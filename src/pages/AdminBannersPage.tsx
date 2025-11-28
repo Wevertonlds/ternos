@@ -72,9 +72,10 @@ const AdminBannersPage = () => {
     setEditingBanner(banner);
     setImagePreview(banner.imageUrl);
     form.reset({
-      ...banner,
+      id: banner.id,
       title: banner.title || '',
       subtitle: banner.subtitle || '',
+      imageUrl: banner.imageUrl,
       button_text: banner.button_text || '',
       button_link: banner.button_link || '',
       imageFile: undefined,

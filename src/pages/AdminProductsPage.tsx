@@ -82,9 +82,12 @@ const AdminProductsPage = () => {
     setEditingProduct(product);
     setImagePreview(product.imageUrl);
     form.reset({
-      ...product,
+      id: product.id,
       name: product.name || '',
       brand: product.brand || '',
+      price: product.price,
+      imageUrl: product.imageUrl,
+      category: product.category,
       sizes: product.sizes.join(', '),
       imageFile: undefined,
     });
