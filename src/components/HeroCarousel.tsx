@@ -30,9 +30,19 @@ const HeroCarousel = () => {
   }
 
   if (banners.length === 0) {
+    // Fallback content if no banners are configured
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
-        <p>Nenhum banner disponível no momento.</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
+        <h1 className="text-4xl md:text-6xl font-bold font-display mb-4 text-brand">Bem-vindo!</h1>
+        <p className="text-lg text-white/80 mb-8 text-center">
+          Configure seus banners na área de gestão para começar.
+        </p>
+        <Link to="/admin/banners">
+          <Button size="lg" className="bg-brand hover:bg-brand/90 text-brand-foreground h-14 px-8 text-lg">
+            Ir para Banners Admin
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -40,7 +50,7 @@ const HeroCarousel = () => {
   return (
     <Carousel
       plugins={[plugin.current]}
-      className="w-full"
+      className="w-full min-h-screen" // Ensure Carousel container takes full height
       onMouseEnter={plugin.current.stop}
       onMouseLeave={plugin.current.reset}
     >
