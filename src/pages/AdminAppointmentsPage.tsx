@@ -1,16 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { MoreHorizontal, Check, X, Clock, MessageCircle, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Check, X, Clock, MessageCircle, Loader2, Download, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useAppointments, useBlockedDates, useToggleBlockDate, useUpdateAppointmentStatus } from '@/hooks/useAppointments';
+import { useAppointments, useBlockedDates, useToggleBlockDate, useUpdateAppointmentStatus, useDeleteAppointment } from '@/hooks/useAppointments';
 import { Appointment, AppointmentStatus } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const statusConfig: { [key in AppointmentStatus]: { variant: "secondary" | "default" | "destructive", icon: React.ReactNode, label: string } } = {
   Pendente: { variant: 'secondary', icon: <Clock className="mr-1 h-3 w-3" />, label: 'Pendente' },
@@ -23,8 +24,10 @@ const AdminAppointmentsPage = () => {
   const { data: blockedDates = [], isLoading: isLoadingBlockedDates } = useBlockedDates();
   const toggleBlockDateMutation = useToggleBlockDate();
   const updateStatusMutation = useUpdateAppointmentStatus();
+  const deleteAppointmentMutation = useDeleteAppointment();
   
   const [selectedDates, setSelectedDates] = useState<Date[] | undefined>([]);
+  const [deletingAppointment, setDeletingAppointment] = useState<Appointment | null>(null);
 
   const handleToggleBlockDates = () => {
     if (selectedDates && selectedDates.length > 0) {
@@ -42,6 +45,20 @@ const AdminAppointmentsPage = () => {
     updateStatusMutation.mutate({ id, status }, {
       onSuccess: () => toast.success('Status do agendamento atualizado!'),
       onError: (error) => toast.error(`Erro ao atualizar status: ${error.message}`),
+    });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deletingAppointment) return;
+    deleteAppointmentMutation.mutate(deletingAppointment.id, {
+      onSuccess: () => {
+        toast.success('Agendamento excluído com sucesso!');
+        setDeletingAppointment(null);
+      },
+      onError: (error) => {
+        toast.error(`Erro ao excluir: ${error.message}`);
+        setDeletingAppointment(null);
+      },
     });
   };
 
@@ -82,13 +99,44 @@ const AdminAppointmentsPage = () => {
     return { pendingAppointments: pending, pastAppointments: past };
   }, [appointments]);
 
+  const handleExportCSV = () => {
+    if (pastAppointments.length === 0) {
+      toast.info('Não há dados no histórico para exportar.');
+      return;
+    }
+
+    const headers = ['Data', 'Nome', 'Telefone', 'Endereço', 'Status', 'Itens'];
+    const rows = pastAppointments.map(app => {
+      const dateString = app.date.replace(' ', 'T');
+      const appointmentDate = new Date(dateString.includes('+') || dateString.endsWith('Z') ? dateString : dateString + 'Z');
+      const formattedDate = format(appointmentDate, "dd/MM/yyyy HH:mm", { locale: ptBR });
+      
+      const items = app.fitting_items.map(item => `${item.name} (${item.selectedSize})`).join('; ');
+
+      return [
+        `"${formattedDate}"`,
+        `"${app.name}"`,
+        `"${app.phone}"`,
+        `"${app.address.replace(/"/g, '""')}"`,
+        `"${app.status}"`,
+        `"${items}"`
+      ].join(',');
+    });
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'historico_agendamentos.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const renderAppointmentCard = (app: Appointment) => {
     const whatsappLink = `https://wa.me/${formatPhoneForLink(app.phone)}`;
     
-    // Ensure the date from Supabase is parsed as UTC.
-    // A `timestamp` column might return '2024-11-29 03:13:00', which `new Date()`
-    // would incorrectly interpret as local time. We ensure it's parsed as UTC
-    // before converting to the local timezone for display.
     const dateString = app.date.replace(' ', 'T');
     const appointmentDate = new Date(dateString.includes('+') || dateString.endsWith('Z') ? dateString : dateString + 'Z');
 
@@ -131,6 +179,11 @@ const AdminAppointmentsPage = () => {
                 <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Finalizado')}>Marcar como Finalizado</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Cancelado')}>Marcar como Cancelado</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleUpdateStatus(app.id, 'Pendente')}>Marcar como Pendente</DropdownMenuItem>
+                {app.status !== 'Pendente' && (
+                  <DropdownMenuItem onClick={() => setDeletingAppointment(app)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                    <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -165,9 +218,15 @@ const AdminAppointmentsPage = () => {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle>Histórico de Agendamentos</CardTitle>
-              <CardDescription>Visualize agendamentos finalizados e cancelados.</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Histórico de Agendamentos</CardTitle>
+                <CardDescription>Visualize agendamentos finalizados e cancelados.</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleExportCSV} disabled={pastAppointments.length === 0}>
+                <Download className="mr-2 h-4 w-4" />
+                Exportar CSV
+              </Button>
             </CardHeader>
             <CardContent>
               {isLoadingAppointments ? (
@@ -218,6 +277,23 @@ const AdminAppointmentsPage = () => {
           </Card>
         </div>
       </div>
+      <AlertDialog open={deletingAppointment !== null} onOpenChange={() => setDeletingAppointment(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este agendamento do histórico? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={deleteAppointmentMutation.isPending}>
+              {deleteAppointmentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

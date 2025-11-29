@@ -57,6 +57,21 @@ export const useUpdateAppointmentStatus = () => {
   });
 };
 
+const deleteAppointment = async (id: number) => {
+  const { error } = await supabase.from('appointments').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+};
+
+export const useDeleteAppointment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteAppointment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+    },
+  });
+};
+
 // BLOCKED DATES
 
 interface BlockedDate {
