@@ -15,8 +15,9 @@ import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useFittingRoom } from '@/contexts/FittingRoomContext';
-import { useAddAppointment, useBlockedDates } from '@/hooks/useAppointments';
+import { useAddAppointment, useBlockedDates, useAppointments } from '@/hooks/useAppointments';
 import { cn } from '@/lib/utils';
+import { Appointment } from '@/types';
 
 interface SchedulingModalProps {
   isOpen: boolean;
@@ -30,17 +31,46 @@ const formSchema = z.object({
   date: z.date({
     required_error: 'A data do agendamento é obrigatória.',
   }),
-  time: z.string({ required_error: 'O horário é obrigatório.' }),
+  time: z.string().min(1, { message: 'O horário é obrigatório.' }),
+}).refine((data, ctx) => {
+  if (!data.date || !data.time) {
+    return true; // Deixa a validação individual dos campos tratar isso
+  }
+  
+  const appointments = ctx.context.appointments as Appointment[];
+  if (!appointments) return true;
+
+  const [hour, minute] = data.time.split(':').map(Number);
+  const selectedDateTime = new Date(data.date);
+  selectedDateTime.setHours(hour, minute, 0, 0);
+
+  const isBooked = appointments.some(app => 
+    app.status === 'Pendente' && new Date(app.date).getTime() === selectedDateTime.getTime()
+  );
+
+  if (isBooked) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Este horário já está agendado. Que tal tentar no dia seguinte?',
+      path: ['time'],
+    });
+    return false;
+  }
+
+  return true;
 });
 
 const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) => {
   const { fittingItems, removeFittingItem, clearFittingRoom } = useFittingRoom();
   const { data: blockedDates = [], isLoading: isLoadingBlockedDates } = useBlockedDates();
+  const { data: appointments = [], isLoading: isLoadingAppointments } = useAppointments();
   const addAppointmentMutation = useAddAppointment();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema, {
+      context: { appointments: appointments || [] }
+    }),
     defaultValues: {
       name: '',
       phone: '',
@@ -80,6 +110,8 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
     navigate('/products');
   };
 
+  const isLoading = isLoadingBlockedDates || isLoadingAppointments;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -116,107 +148,109 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <fieldset disabled={isLoading} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Data da visita</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={'outline'}
+                                  className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                                >
+                                  {field.value ? (
+                                    format(field.value, 'PPP', { locale: ptBR })
+                                  ) : (
+                                    <span>Escolha uma data</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              {isLoadingBlockedDates ? (
+                                <div className="flex justify-center items-center p-4"><Loader2 className="h-6 w-6 animate-spin" /></div>
+                              ) : (
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  disabled={(date) =>
+                                    date < new Date(new Date().setDate(new Date().getDate() - 1)) ||
+                                    blockedDates.some(d => d.toDateString() === date.toDateString())
+                                  }
+                                  initialFocus
+                                  locale={ptBR}
+                                />
+                              )}
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="time"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Horário</FormLabel>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormField
                     control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Data da visita</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={'outline'}
-                                className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
-                              >
-                                {field.value ? (
-                                  format(field.value, 'PPP', { locale: ptBR })
-                                ) : (
-                                  <span>Escolha uma data</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            {isLoadingBlockedDates ? (
-                              <div className="flex justify-center items-center p-4"><Loader2 className="h-6 w-6 animate-spin" /></div>
-                            ) : (
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) =>
-                                  date < new Date(new Date().setDate(new Date().getDate() - 1)) ||
-                                  blockedDates.some(d => d.toDateString() === date.toDateString())
-                                }
-                                initialFocus
-                                locale={ptBR}
-                              />
-                            )}
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="time"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Horário</FormLabel>
+                        <FormLabel>Nome Completo</FormLabel>
                         <FormControl>
-                          <Input type="time" {...field} />
+                          <Input placeholder="Seu nome" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome Completo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Seu nome" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>WhatsApp</FormLabel>
-                      <FormControl>
-                        <Input placeholder="(XX) XXXXX-XXXX" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Endereço</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Rua, número, bairro, cidade..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>WhatsApp</FormLabel>
+                        <FormControl>
+                          <Input placeholder="(XX) XXXXX-XXXX" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Endereço</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Rua, número, bairro, cidade..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </fieldset>
                 <DialogFooter>
-                  <Button type="submit" className="w-full" disabled={addAppointmentMutation.isPending}>
-                    {addAppointmentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Button type="submit" className="w-full" disabled={addAppointmentMutation.isPending || isLoading}>
+                    {(addAppointmentMutation.isPending || isLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Confirmar Agendamento
                   </Button>
                 </DialogFooter>
