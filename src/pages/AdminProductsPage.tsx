@@ -269,7 +269,7 @@ const AdminProductsPage = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Imagem do Produto</FormLabel>
-                    {imagePreview && <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-md my-2" />}
+                    {imagePreview && <img src={imagePreview} alt="Preview" className="w-32 h-32 object-contain rounded-md my-2 border" />}
                     <FormControl>
                       <Input
                         type="file"

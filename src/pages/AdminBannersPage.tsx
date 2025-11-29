@@ -178,7 +178,7 @@ const AdminBannersPage = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Imagem do Banner</FormLabel>
-                        {imagePreview && <img src={imagePreview} alt="Preview" className="w-full h-32 object-cover rounded-md my-2" />}
+                        {imagePreview && <img src={imagePreview} alt="Preview" className="w-full h-32 object-contain rounded-md my-2 border" />}
                         <FormControl>
                           <Input
                             type="file"
@@ -259,7 +259,9 @@ const AdminBannersPage = () => {
           {banners.map((banner) => (
             <Card key={banner.id} className="overflow-hidden">
               <CardHeader className="p-0">
-                <img src={banner.image_url} alt="Preview" className="w-full h-40 object-cover" />
+                <div className="w-full h-40 flex items-center justify-center bg-gray-100">
+                  <img src={banner.image_url} alt="Preview" className="h-full w-full object-contain" />
+                </div>
               </CardHeader>
               <CardContent className="p-4">
                 <CardTitle className="text-lg" dangerouslySetInnerHTML={{ __html: banner.title.replace(/<span class="text-brand">/g, '<span class="text-orange-500">') }} />
