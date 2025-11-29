@@ -192,7 +192,9 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
                               )}
                             </PopoverContent>
                           </Popover>
-                          <FormMessage />
+                          <div className="h-5">
+                            <FormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
@@ -200,12 +202,14 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
                       control={form.control}
                       name="time"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                           <FormLabel>Horário</FormLabel>
                           <FormControl>
                             <Input type="time" {...field} />
                           </FormControl>
-                          <FormMessage />
+                          <div className="h-5">
+                            <FormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
