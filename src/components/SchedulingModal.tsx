@@ -32,13 +32,13 @@ const formSchema = z.object({
     required_error: 'A data do agendamento é obrigatória.',
   }),
   time: z.string().min(1, { message: 'O horário é obrigatório.' }),
-}).refine((data, ctx) => {
+}).superRefine((data, ctx) => {
   if (!data.date || !data.time) {
-    return true; // Deixa a validação individual dos campos tratar isso
+    return; // Deixa a validação individual dos campos tratar isso
   }
   
-  const appointments = ctx.context.appointments as Appointment[];
-  if (!appointments) return true;
+  const appointments = (ctx as any).appointments as Appointment[];
+  if (!appointments) return;
 
   const [hour, minute] = data.time.split(':').map(Number);
   const selectedDateTime = new Date(data.date);
@@ -54,10 +54,7 @@ const formSchema = z.object({
       message: 'Este horário já está agendado. Que tal tentar no dia seguinte?',
       path: ['time'],
     });
-    return false;
   }
-
-  return true;
 });
 
 const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) => {
