@@ -84,6 +84,14 @@ const AdminAppointmentsPage = () => {
 
   const renderAppointmentCard = (app: Appointment) => {
     const whatsappLink = `https://wa.me/${formatPhoneForLink(app.phone)}`;
+    
+    // Ensure the date from Supabase is parsed as UTC.
+    // A `timestamp` column might return '2024-11-29 03:13:00', which `new Date()`
+    // would incorrectly interpret as local time. We ensure it's parsed as UTC
+    // before converting to the local timezone for display.
+    const dateString = app.date.replace(' ', 'T');
+    const appointmentDate = new Date(dateString.includes('+') || dateString.endsWith('Z') ? dateString : dateString + 'Z');
+
     return (
       <Card key={app.id}>
         <CardContent className="p-4 flex flex-col sm:flex-row justify-between">
@@ -92,7 +100,7 @@ const AdminAppointmentsPage = () => {
             <p className="text-sm text-muted-foreground">{app.address}</p>
             <p className="text-sm text-muted-foreground">WhatsApp: {app.phone}</p>
             <p className="text-sm font-semibold text-brand mt-1">
-              {format(new Date(app.date), "'Dia' dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+              {format(appointmentDate, "'Dia' dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
             </p>
             <div className="mt-2">
               <p className="text-xs font-medium mb-1">Itens:</p>
