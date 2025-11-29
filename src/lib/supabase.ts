@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Tenta ler com o prefixo VITE_ (padrão Vite) ou sem prefixo (fallback para alguns ambientes de build)
-const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL)?.trim();
-const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)?.trim();
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase URL and Anon Key must be defined in .env file');
+  // Em um ambiente de produção/build, o Vite injeta essas variáveis.
+  // Se estiver faltando, o erro será lançado, mas confiamos que o ambiente Vercel as fornecerá.
+  throw new Error('VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be defined.');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
