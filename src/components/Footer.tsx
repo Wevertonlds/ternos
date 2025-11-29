@@ -32,6 +32,9 @@ const Footer = () => {
 
   const siteNameFirstWord = settings?.site_name?.split(' ')[0] || '';
   const siteNameRest = settings?.site_name?.split(' ').slice(1).join(' ') || '';
+  
+  const footerQuote = settings.footer_quote?.trim();
+  const footerSignature = settings.footer_signature?.trim();
 
   return (
     <footer className="bg-foreground text-background">
@@ -69,14 +72,16 @@ const Footer = () => {
             <p>&copy; {new Date().getFullYear()} <span className="text-brand">{siteNameFirstWord}</span> {siteNameRest}. Todos os direitos reservados.</p>
             <Link to="/admin" className="text-xs hover:text-brand transition-colors mt-2 inline-block">Área de Gestão</Link>
           </div>
-          {settings?.footer_quote && (
+          {(footerQuote || footerSignature) && (
             <div className="text-center md:text-right">
-              <p className="text-brand/75 text-xs italic">
-                "{settings.footer_quote}"
-              </p>
-              {settings.footer_signature && (
+              {footerQuote && (
+                <p className="text-brand/75 text-xs italic">
+                  "{footerQuote}"
+                </p>
+              )}
+              {footerSignature && (
                 <p className="text-brand/75 text-xs font-semibold mt-1">
-                  {settings.footer_signature}
+                  {footerSignature}
                 </p>
               )}
             </div>
