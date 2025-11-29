@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, Edit, Trash2, Loader2 } from 'lucide-react';
 import { Banner } from '@/types';
 import { useBanners, useAddBanner, useUpdateBanner, useDeleteBanner } from '@/hooks/useBanners';
@@ -23,6 +24,8 @@ const bannerSchema = z.object({
   imageFile: z.any().optional(),
   button_text: z.string().min(1, 'O texto do botão é obrigatório.'),
   button_link: z.string().min(1, 'O link do botão é obrigatório.'),
+  image_fit: z.enum(['cover', 'contain']).default('cover'),
+  image_position: z.enum(['center', 'top', 'bottom', 'left', 'right']).default('center'),
 }).refine(data => {
   return data.id || (data.imageFile && data.imageFile.length > 0);
 }, {
@@ -53,6 +56,8 @@ const AdminBannersPage = () => {
       button_text: '',
       button_link: '',
       imageFile: undefined,
+      image_fit: 'cover',
+      image_position: 'center',
     },
   });
 
@@ -66,7 +71,9 @@ const AdminBannersPage = () => {
       image_url: '',
       imageFile: undefined, 
       button_text: '', 
-      button_link: '' 
+      button_link: '',
+      image_fit: 'cover',
+      image_position: 'center',
     });
     setIsDialogOpen(true);
   };
@@ -84,6 +91,8 @@ const AdminBannersPage = () => {
       button_text: banner.button_text || '',
       button_link: banner.button_link || '',
       imageFile: undefined,
+      image_fit: banner.image_fit || 'cover',
+      image_position: banner.image_position || 'center',
     });
     setIsDialogOpen(true);
   };
@@ -126,6 +135,8 @@ const AdminBannersPage = () => {
         button_text: values.button_text,
         button_link: values.button_link,
         image_url: editingBanner.image_url,
+        image_fit: values.image_fit,
+        image_position: values.image_position,
       };
       updateBannerMutation.mutate({ banner: bannerToUpdate, imageFile }, mutationOptions);
     } else {
@@ -134,6 +145,8 @@ const AdminBannersPage = () => {
         subtitle: values.subtitle,
         button_text: values.button_text,
         button_link: values.button_link,
+        image_fit: values.image_fit,
+        image_position: values.image_position,
       };
       addBannerMutation.mutate({ banner: bannerToAdd, imageFile }, mutationOptions);
     }
@@ -235,6 +248,37 @@ const AdminBannersPage = () => {
                       <FormMessage />
                     </FormItem>
                   )} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="image_fit" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ajuste da Imagem</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            <SelectItem value="cover">Preencher (cover)</SelectItem>
+                            <SelectItem value="contain">Conter (contain)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="image_position" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Posição da Imagem</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            <SelectItem value="center">Centro</SelectItem>
+                            <SelectItem value="top">Topo</SelectItem>
+                            <SelectItem value="bottom">Fundo</SelectItem>
+                            <SelectItem value="left">Esquerda</SelectItem>
+                            <SelectItem value="right">Direita</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
                 </form>
               </Form>
             </div>
