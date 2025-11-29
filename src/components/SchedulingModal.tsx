@@ -24,6 +24,7 @@ interface SchedulingModalProps {
   onClose: () => void;
 }
 
+// Schema base sem a validação que depende de dados externos
 const formSchema = z.object({
   name: z.string().min(2, { message: 'O nome deve ter pelo menos 2 caracteres.' }),
   phone: z.string().min(10, { message: 'Por favor, insira um telefone válido.' }),
@@ -32,30 +33,32 @@ const formSchema = z.object({
     required_error: 'A data do agendamento é obrigatória.',
   }),
   time: z.string().min(1, { message: 'O horário é obrigatório.' }),
-}).superRefine((data, ctx) => {
-  if (!data.date || !data.time) {
-    return; // Deixa a validação individual dos campos tratar isso
-  }
-  
-  const appointments = (ctx as any).appointments as Appointment[];
-  if (!appointments) return;
-
-  const [hour, minute] = data.time.split(':').map(Number);
-  const selectedDateTime = new Date(data.date);
-  selectedDateTime.setHours(hour, minute, 0, 0);
-
-  const isBooked = appointments.some(app => 
-    app.status === 'Pendente' && new Date(app.date).getTime() === selectedDateTime.getTime()
-  );
-
-  if (isBooked) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Este horário já está agendado. Que tal tentar no dia seguinte?',
-      path: ['time'],
-    });
-  }
 });
+
+// Função que cria o schema completo com a validação dinâmica
+const getValidationSchema = (appointments: Appointment[]) => {
+  return formSchema.superRefine((data, ctx) => {
+    if (!data.date || !data.time) {
+      return; // Deixa a validação de campos individuais tratar isso
+    }
+    
+    const [hour, minute] = data.time.split(':').map(Number);
+    const selectedDateTime = new Date(data.date);
+    selectedDateTime.setHours(hour, minute, 0, 0);
+
+    const isBooked = appointments.some(app => 
+      app.status === 'Pendente' && new Date(app.date).getTime() === selectedDateTime.getTime()
+    );
+
+    if (isBooked) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Este horário já está agendado. Que tal tentar no dia seguinte?',
+        path: ['time'],
+      });
+    }
+  });
+};
 
 const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) => {
   const { fittingItems, removeFittingItem, clearFittingRoom } = useFittingRoom();
@@ -65,15 +68,17 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema, {
-      context: { appointments: appointments || [] }
-    }),
+    resolver: async (data, context, options) => {
+      const validationSchema = getValidationSchema(appointments);
+      return zodResolver(validationSchema)(data, context, options);
+    },
     defaultValues: {
       name: '',
       phone: '',
       address: '',
       time: '',
     },
+    mode: 'onChange', // Valida em tempo real
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
