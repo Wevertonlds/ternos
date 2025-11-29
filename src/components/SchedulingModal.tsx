@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFittingRoom } from '@/contexts/FittingRoomContext';
 import { useAddAppointment, useBlockedDates } from '@/hooks/useAppointments';
 import { cn } from '@/lib/utils';
@@ -30,7 +31,10 @@ const formSchema = z.object({
   date: z.date({
     required_error: 'A data do agendamento é obrigatória.',
   }),
+  time: z.string({ required_error: 'O horário é obrigatório.' }),
 });
+
+const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
 
 const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) => {
   const { fittingItems, removeFittingItem, clearFittingRoom } = useFittingRoom();
@@ -44,17 +48,25 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
       name: '',
       phone: '',
       address: '',
+      time: '',
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    const [hour, minute] = values.time.split(':').map(Number);
+    const combinedDateTime = new Date(values.date);
+    combinedDateTime.setHours(hour, minute, 0, 0);
+
     addAppointmentMutation.mutate({
-      ...values,
+      name: values.name,
+      phone: values.phone,
+      address: values.address,
+      date: combinedDateTime,
       fitting_items: fittingItems,
     }, {
       onSuccess: () => {
         toast.success('Agendamento realizado com sucesso!', {
-          description: `Entraremos em contato para confirmar sua visita em ${format(values.date, 'PPP', { locale: ptBR })}.`,
+          description: `Entraremos em contato para confirmar sua visita em ${format(combinedDateTime, "PPP 'às' HH:mm", { locale: ptBR })}.`,
         });
         onClose();
         form.reset();
@@ -107,50 +119,74 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Data da visita</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="date"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>Data da visita</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={'outline'}
+                                className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                              >
+                                {field.value ? (
+                                  format(field.value, 'PPP', { locale: ptBR })
+                                ) : (
+                                  <span>Escolha uma data</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            {isLoadingBlockedDates ? (
+                              <div className="flex justify-center items-center p-4"><Loader2 className="h-6 w-6 animate-spin" /></div>
+                            ) : (
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                  date < new Date(new Date().setDate(new Date().getDate() - 1)) ||
+                                  blockedDates.some(d => d.toDateString() === date.toDateString())
+                                }
+                                initialFocus
+                                locale={ptBR}
+                              />
+                            )}
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="time"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Horário</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <Button
-                              variant={'outline'}
-                              className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
-                            >
-                              {field.value ? (
-                                format(field.value, 'PPP', { locale: ptBR })
-                              ) : (
-                                <span>Escolha uma data</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
                           </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          {isLoadingBlockedDates ? (
-                             <div className="flex justify-center items-center p-4"><Loader2 className="h-6 w-6 animate-spin" /></div>
-                          ) : (
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) =>
-                                date < new Date(new Date().setDate(new Date().getDate() - 1)) ||
-                                blockedDates.some(d => d.toDateString() === date.toDateString())
-                              }
-                              initialFocus
-                              locale={ptBR}
-                            />
-                          )}
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                          <SelectContent>
+                            {timeSlots.map(time => (
+                              <SelectItem key={time} value={time}>{time}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
                   name="name"
