@@ -52,8 +52,6 @@ const HeroCarousel = () => {
     <Carousel
       plugins={[autoplayPlugin.current]}
       className="w-full min-h-screen" // Ensure Carousel container takes full height
-      onMouseEnter={autoplayPlugin.current.stop}
-      onMouseLeave={autoplayPlugin.current.reset}
     >
       <CarouselContent>
         {banners.map((banner, index) => (
