@@ -9,7 +9,8 @@ import { useBanners } from '@/hooks/useBanners';
 const HeroCarousel = () => {
   const { data: banners = [], isLoading, error } = useBanners();
 
-  const plugin = React.useRef(
+  // Inicializa o plugin Autoplay
+  const autoplayPlugin = React.useRef(
     Autoplay({ delay: 7000, stopOnInteraction: true })
   );
 
@@ -49,10 +50,10 @@ const HeroCarousel = () => {
 
   return (
     <Carousel
-      plugins={[plugin.current]}
+      plugins={[autoplayPlugin.current]}
       className="w-full min-h-screen" // Ensure Carousel container takes full height
-      onMouseEnter={plugin.current.stop}
-      onMouseLeave={plugin.current.reset}
+      onMouseEnter={autoplayPlugin.current.stop}
+      onMouseLeave={autoplayPlugin.current.reset}
     >
       <CarouselContent>
         {banners.map((banner, index) => (
