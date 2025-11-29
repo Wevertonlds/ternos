@@ -68,7 +68,7 @@ const HeroCarousel = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
                 <div className="relative z-10 text-center px-4 animate-fade-in">
                   <h1
-                    className="text-6xl md:text-8xl font-bold font-display"
+                    className="text-4xl sm:text-6xl md:text-8xl font-bold font-display"
                     dangerouslySetInnerHTML={{ __html: banner.title }}
                   />
                   <p className="mt-6 text-lg md:text-xl text-white/80 max-w-2xl mx-auto" style={{ animationDelay: '0.2s' }}>
