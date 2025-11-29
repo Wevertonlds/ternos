@@ -14,7 +14,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFittingRoom } from '@/contexts/FittingRoomContext';
 import { useAddAppointment, useBlockedDates } from '@/hooks/useAppointments';
 import { cn } from '@/lib/utils';
@@ -33,8 +32,6 @@ const formSchema = z.object({
   }),
   time: z.string({ required_error: 'O horário é obrigatório.' }),
 });
-
-const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
 
 const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) => {
   const { fittingItems, removeFittingItem, clearFittingRoom } = useFittingRoom();
@@ -170,18 +167,9 @@ const SchedulingModal: React.FC<SchedulingModalProps> = ({ isOpen, onClose }) =>
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Horário</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {timeSlots.map(time => (
-                              <SelectItem key={time} value={time}>{time}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
