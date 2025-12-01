@@ -97,21 +97,27 @@ const updateBanner = async ({ banner, imageFile }: UpdateBannerParams) => {
     final_image_url = await uploadImage(imageFile);
   }
 
+  // PASSO DE DIAGNÓSTICO: Removendo temporariamente os campos de ajuste de imagem
+  const payload = {
+    title: banner.title,
+    subtitle: banner.subtitle,
+    button_text: banner.button_text,
+    button_link: banner.button_link,
+    image_url: final_image_url,
+    // image_fit: banner.image_fit,
+    // image_position: banner.image_position,
+  };
+
   const { data, error } = await supabase
     .from('banners')
-    .update({
-      title: banner.title,
-      subtitle: banner.subtitle,
-      button_text: banner.button_text,
-      button_link: banner.button_link,
-      image_url: final_image_url,
-      image_fit: banner.image_fit,
-      image_position: banner.image_position,
-    })
+    .update(payload)
     .eq('id', banner.id)
     .select();
     
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error('Supabase update error:', error);
+    throw new Error(error.message);
+  }
   return data;
 };
 
