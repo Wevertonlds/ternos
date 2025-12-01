@@ -54,14 +54,11 @@ const HeroCarousel = () => {
     >
       <CarouselContent>
         {banners.map((banner, index) => {
-          const imageFitClass = banner.image_fit === 'contain' ? 'bg-contain' : 'bg-cover';
-          const imagePositionClass = `bg-${banner.image_position || 'top'}`;
-
           return (
             <CarouselItem key={index}>
               <div className="relative flex flex-col justify-center min-h-screen bg-black text-white overflow-hidden">
                 <div
-                  className={`absolute inset-0 bg-no-repeat opacity-50 ${imageFitClass} ${imagePositionClass}`}
+                  className="absolute inset-0 bg-no-repeat opacity-50 bg-cover bg-center"
                   style={{ backgroundImage: `url('${banner.image_url}')` }}
                 ></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent"></div>

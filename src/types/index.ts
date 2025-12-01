@@ -46,6 +46,4 @@ export interface Banner {
   button_text: string;
   button_link: string;
   created_at?: string;
-  image_fit?: 'cover' | 'contain';
-  image_position?: 'center' | 'top' | 'bottom' | 'left' | 'right';
 }
