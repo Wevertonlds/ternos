@@ -97,7 +97,7 @@ const updateBanner = async ({ banner, imageFile }: UpdateBannerParams) => {
     final_image_url = await uploadImage(imageFile);
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('banners')
     .update({
       title: banner.title,
@@ -108,10 +108,11 @@ const updateBanner = async ({ banner, imageFile }: UpdateBannerParams) => {
       image_fit: banner.image_fit,
       image_position: banner.image_position,
     })
-    .eq('id', banner.id);
+    .eq('id', banner.id)
+    .select();
     
   if (error) throw new Error(error.message);
-  return null;
+  return data;
 };
 
 export const useUpdateBanner = () => {
