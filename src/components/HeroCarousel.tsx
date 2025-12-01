@@ -9,7 +9,6 @@ import { useBanners } from '@/hooks/useBanners';
 const HeroCarousel = () => {
   const { data: banners = [], isLoading, error } = useBanners();
 
-  // Inicializa o plugin Autoplay
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 7000, stopOnInteraction: true })
   );
@@ -51,21 +50,24 @@ const HeroCarousel = () => {
   return (
     <Carousel
       plugins={[autoplayPlugin.current]}
-      className="w-full min-h-screen" // Ensure Carousel container takes full height
+      className="w-full min-h-screen bg-black" // Fundo preto para preencher espaços vazios
     >
       <CarouselContent>
         {banners.map((banner, index) => {
-          const imageFitClass = banner.image_fit === 'contain' ? 'bg-contain' : 'bg-cover';
-          const imagePositionClass = `bg-${banner.image_position || 'center'}`;
-
           return (
             <CarouselItem key={index}>
-              <div className="relative flex flex-col justify-center min-h-screen bg-black text-white overflow-hidden">
-                <div
-                  className={`absolute inset-0 bg-no-repeat opacity-50 ${imageFitClass} ${imagePositionClass}`}
-                  style={{ backgroundImage: `url('${banner.image_url}')` }}
-                ></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40"></div>
+              <div className="relative flex flex-col justify-center min-h-screen text-white overflow-hidden">
+                <img
+                  src={banner.image_url}
+                  alt="" // Imagem decorativa
+                  className="absolute inset-0 w-full h-full opacity-50"
+                  style={{ 
+                    // 'contain' garante que a imagem inteira seja visível sem ser cortada ('zoom').
+                    objectFit: 'contain', 
+                    objectPosition: banner.image_position || 'center' 
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/20"></div>
                 
                 <div className="relative z-10 container mx-auto px-4 animate-fade-in">
                   <div className="max-w-3xl text-center md:text-left">
