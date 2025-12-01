@@ -1,5 +1,8 @@
 import React, { useState, useMemo } from 'react';
+import { useProducts } from '@/hooks/useProducts';
+import { Product } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -22,25 +25,33 @@ const formatCurrency = (value: number) => {
 };
 
 const AdminCalculatorPage = () => {
-  const [costPrice, setCostPrice] = useState('');
+  const { data: products = [], isLoading } = useProducts();
+  const [selectedProductId, setSelectedProductId] = useState<string | undefined>();
   const [sellPrice, setSellPrice] = useState('');
   const [result, setResult] = useState<CalculationResult | null>(null);
 
+  const selectedProduct = useMemo(() => {
+    return products.find((p) => p.id === Number(selectedProductId));
+  }, [selectedProductId, products]);
+
   const suggestions = useMemo(() => {
-    const cost = parseFloat(costPrice);
-    if (isNaN(cost) || cost <= 0) return null;
+    if (!selectedProduct) return null;
+    const cost = selectedProduct.price;
     return {
       min: cost * 1.2,
       ideal: cost * 2,
       premium: cost * 2.5,
     };
-  }, [costPrice]);
+  }, [selectedProduct]);
 
   const handleCalculate = () => {
-    const cost = parseFloat(costPrice);
+    if (!selectedProduct || !sellPrice) {
+      return;
+    }
+    const cost = selectedProduct.price;
     const sell = parseFloat(sellPrice);
 
-    if (isNaN(cost) || isNaN(sell) || cost <= 0 || sell <= 0) {
+    if (isNaN(sell) || sell <= 0) {
       return;
     }
 
@@ -81,19 +92,28 @@ const AdminCalculatorPage = () => {
         <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Dados para Cálculo</CardTitle>
-              <CardDescription>Informe o custo e o preço de venda desejado.</CardDescription>
+              <CardTitle>Dados do Produto</CardTitle>
+              <CardDescription>Selecione o produto e informe o preço de venda.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="cost-price">Preço de Custo (Fonte)</Label>
-                <Input
-                  id="cost-price"
-                  type="number"
-                  placeholder="Ex: 100.00"
-                  value={costPrice}
-                  onChange={(e) => setCostPrice(e.target.value)}
-                />
+                <Label htmlFor="product">Produto</Label>
+                <Select onValueChange={setSelectedProductId} value={selectedProductId}>
+                  <SelectTrigger id="product">
+                    <SelectValue placeholder={isLoading ? 'Carregando...' : 'Selecione um produto'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {products.map((product: Product) => (
+                      <SelectItem key={product.id} value={String(product.id)}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="cost">Preço de Custo</Label>
+                <Input id="cost" value={selectedProduct ? formatCurrency(selectedProduct.price) : 'R$ 0,00'} disabled />
               </div>
               <div>
                 <Label htmlFor="sell-price">Preço de Venda Desejado</Label>
@@ -103,12 +123,12 @@ const AdminCalculatorPage = () => {
                   placeholder="Ex: 199.90"
                   value={sellPrice}
                   onChange={(e) => setSellPrice(e.target.value)}
-                  disabled={!costPrice}
+                  disabled={!selectedProduct}
                 />
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={handleCalculate} disabled={!costPrice || !sellPrice} className="w-full">
+              <Button onClick={handleCalculate} disabled={!selectedProduct || !sellPrice} className="w-full">
                 Calcular
               </Button>
             </CardFooter>
@@ -120,8 +140,8 @@ const AdminCalculatorPage = () => {
           {suggestions && (
             <Card className="animate-fade-in">
               <CardHeader>
-                <CardTitle>Sugestões de Preço de Venda</CardTitle>
-                <CardDescription>Com base no custo de {formatCurrency(parseFloat(costPrice))}, sugerimos os seguintes preços:</CardDescription>
+                <CardTitle>Sugestões de Preço</CardTitle>
+                <CardDescription>Com base no custo do produto, sugerimos os seguintes preços de venda:</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <ResultCard icon={TrendingDown} title="Preço Mínimo" value={formatCurrency(suggestions.min)} colorClass="text-amber-600" />
