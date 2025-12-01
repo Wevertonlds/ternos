@@ -175,7 +175,7 @@ const AdminBannersPage = () => {
               Adicionar Banner
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-3xl">
             <DialogHeader>
               <DialogTitle>{editingBanner ? 'Editar Banner' : 'Adicionar Novo Banner'}</DialogTitle>
               <DialogDescription>
@@ -255,8 +255,8 @@ const AdminBannersPage = () => {
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                           <SelectContent>
-                            <SelectItem value="cover">Preencher (cover)</SelectItem>
-                            <SelectItem value="contain">Conter (contain)</SelectItem>
+                            <SelectItem value="cover">Preencher (corta a imagem)</SelectItem>
+                            <SelectItem value="contain">Mostrar inteira (sem cortar)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
