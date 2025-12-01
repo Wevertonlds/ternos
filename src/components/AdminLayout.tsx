@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Settings, Image, Package, LogOut, Calendar, Menu } from 'lucide-react';
+import { LayoutDashboard, Settings, Image, Package, LogOut, Calendar, Menu, Calculator } from 'lucide-react';
 import { Button } from './ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -47,6 +47,10 @@ const AdminLayout = () => {
         <NavLink to="/admin/banners" className={navLinkClasses} onClick={() => setIsSidebarOpen(false)}>
           <Image className="mr-3 h-5 w-5" />
           Banners
+        </NavLink>
+        <NavLink to="/admin/calculator" className={navLinkClasses} onClick={() => setIsSidebarOpen(false)}>
+          <Calculator className="mr-3 h-5 w-5" />
+          Calculadora
         </NavLink>
         <NavLink to="/admin/settings" className={navLinkClasses} onClick={() => setIsSidebarOpen(false)}>
           <Settings className="mr-3 h-5 w-5" />

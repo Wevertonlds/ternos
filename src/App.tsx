@@ -11,6 +11,7 @@ import AdminBannersPage from './pages/AdminBannersPage';
 import AdminProductsPage from './pages/AdminProductsPage';
 import AdminAppointmentsPage from './pages/AdminAppointmentsPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminCalculatorPage from './pages/AdminCalculatorPage';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
             <Route path="/admin/settings" element={<AdminSettingsPage />} />
             <Route path="/admin/banners" element={<AdminBannersPage />} />
             <Route path="/admin/products" element={<AdminProductsPage />} />
+            <Route path="/admin/calculator" element={<AdminCalculatorPage />} />
           </Route>
         </Route>
       </Routes>
