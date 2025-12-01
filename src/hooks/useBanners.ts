@@ -60,6 +60,8 @@ const addBanner = async ({ banner, imageFile }: AddBannerParams) => {
       button_text: banner.button_text,
       button_link: banner.button_link,
       image_url: image_url,
+      image_fit: banner.image_fit,
+      image_position: banner.image_position,
     }])
     .select();
   
@@ -101,6 +103,8 @@ const updateBanner = async ({ banner, imageFile }: UpdateBannerParams) => {
     button_text: banner.button_text,
     button_link: banner.button_link,
     image_url: final_image_url,
+    image_fit: banner.image_fit,
+    image_position: banner.image_position,
   };
 
   const { data, error } = await supabase

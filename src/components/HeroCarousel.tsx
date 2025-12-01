@@ -58,8 +58,12 @@ const HeroCarousel = () => {
             <CarouselItem key={index}>
               <div className="relative flex flex-col justify-center min-h-screen bg-black text-white overflow-hidden">
                 <div
-                  className="absolute inset-0 bg-no-repeat opacity-50 bg-cover bg-center"
-                  style={{ backgroundImage: `url('${banner.image_url}')` }}
+                  className="absolute inset-0 bg-no-repeat opacity-50"
+                  style={{ 
+                    backgroundImage: `url('${banner.image_url}')`,
+                    backgroundSize: banner.image_fit || 'cover',
+                    backgroundPosition: banner.image_position || 'center',
+                  }}
                 ></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent"></div>
                 

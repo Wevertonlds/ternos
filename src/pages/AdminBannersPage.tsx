@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, Edit, Trash2, Loader2 } from 'lucide-react';
 import { Banner } from '@/types';
 import { useBanners, useAddBanner, useUpdateBanner, useDeleteBanner } from '@/hooks/useBanners';
@@ -23,6 +24,8 @@ const bannerSchema = z.object({
   imageFile: z.any().optional(),
   button_text: z.string().min(1, 'O texto do botão é obrigatório.'),
   button_link: z.string().min(1, 'O link do botão é obrigatório.'),
+  image_fit: z.enum(['cover', 'contain']).default('cover'),
+  image_position: z.enum(['center', 'top', 'bottom']).default('center'),
 }).refine(data => {
   return data.id || (data.imageFile && data.imageFile.length > 0);
 }, {
@@ -53,6 +56,8 @@ const AdminBannersPage = () => {
       button_text: '',
       button_link: '',
       imageFile: undefined,
+      image_fit: 'cover',
+      image_position: 'center',
     },
   });
 
@@ -67,6 +72,8 @@ const AdminBannersPage = () => {
       imageFile: undefined, 
       button_text: '', 
       button_link: '',
+      image_fit: 'cover',
+      image_position: 'center',
     });
     setIsDialogOpen(true);
   };
@@ -84,6 +91,8 @@ const AdminBannersPage = () => {
       button_text: banner.button_text || '',
       button_link: banner.button_link || '',
       imageFile: undefined,
+      image_fit: banner.image_fit || 'cover',
+      image_position: banner.image_position || 'center',
     });
     setIsDialogOpen(true);
   };
@@ -126,6 +135,8 @@ const AdminBannersPage = () => {
         button_text: values.button_text,
         button_link: values.button_link,
         image_url: editingBanner.image_url,
+        image_fit: values.image_fit,
+        image_position: values.image_position,
       };
       updateBannerMutation.mutate({ banner: bannerToUpdate, imageFile }, mutationOptions);
     } else {
@@ -134,6 +145,8 @@ const AdminBannersPage = () => {
         subtitle: values.subtitle,
         button_text: values.button_text,
         button_link: values.button_link,
+        image_fit: values.image_fit,
+        image_position: values.image_position,
       };
       addBannerMutation.mutate({ banner: bannerToAdd, imageFile }, mutationOptions);
     }
@@ -162,83 +175,118 @@ const AdminBannersPage = () => {
               Adicionar Banner
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-3xl">
+          <DialogContent className="sm:max-w-5xl">
             <DialogHeader>
               <DialogTitle>{editingBanner ? 'Editar Banner' : 'Adicionar Novo Banner'}</DialogTitle>
               <DialogDescription>
                 Preencha as informações abaixo para criar ou atualizar um banner.
               </DialogDescription>
             </DialogHeader>
-            <div className="max-h-[60vh] overflow-y-auto pr-6 pl-2 -mr-2">
+            <div className="max-h-[70vh] overflow-y-auto pr-6 pl-2 -mr-2">
               <Form {...form}>
                 <form id="bannerForm" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
-                  <FormField
-                    control={form.control}
-                    name="imageFile"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Imagem do Banner</FormLabel>
-                        {imagePreview && <img src={imagePreview} alt="Preview" className="w-full h-32 object-contain rounded-md my-2 border" />}
-                        <FormControl>
-                          <Input
-                            type="file"
-                            accept="image/png, image/jpeg, image/webp"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                field.onChange(e.target.files);
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setImagePreview(reader.result as string);
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField control={form.control} name="title_line_1" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Título (Linha 1)</FormLabel>
-                      <FormControl><Input placeholder="Primeira linha do título" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="title_line_2" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Título (Linha 2 - Opcional)</FormLabel>
-                      <FormControl><Input placeholder="Segunda linha do título" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="subtitle" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Subtítulo</FormLabel>
-                      <FormControl><Textarea placeholder="Subtítulo do banner" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="button_text" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Texto do Botão</FormLabel>
-                      <FormControl><Input placeholder="Ex: Ver Coleção" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="button_link" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Link do Botão</FormLabel>
-                      <FormControl><Input placeholder="Ex: /products" {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Coluna da Imagem */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="imageFile"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Imagem do Banner</FormLabel>
+                            {imagePreview && <img src={imagePreview} alt="Preview" className="w-full h-40 object-contain rounded-md my-2 border" />}
+                            <FormControl>
+                              <Input
+                                type="file"
+                                accept="image/png, image/jpeg, image/webp"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    field.onChange(e.target.files);
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      setImagePreview(reader.result as string);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField control={form.control} name="image_fit" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Ajuste da Imagem</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              <SelectItem value="cover">Cobrir (cover)</SelectItem>
+                              <SelectItem value="contain">Conter (contain)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="image_position" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Posição da Imagem (Vertical)</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              <SelectItem value="center">Centro</SelectItem>
+                              <SelectItem value="top">Topo</SelectItem>
+                              <SelectItem value="bottom">Fundo</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+                    {/* Coluna de Textos */}
+                    <div className="space-y-4">
+                      <FormField control={form.control} name="title_line_1" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (Linha 1)</FormLabel>
+                          <FormControl><Input placeholder="Primeira linha do título" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="title_line_2" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Título (Linha 2 - Opcional)</FormLabel>
+                          <FormControl><Input placeholder="Segunda linha do título" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="subtitle" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Subtítulo</FormLabel>
+                          <FormControl><Textarea placeholder="Subtítulo do banner" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="button_text" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Texto do Botão</FormLabel>
+                          <FormControl><Input placeholder="Ex: Ver Coleção" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField control={form.control} name="button_link" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Link do Botão</FormLabel>
+                          <FormControl><Input placeholder="Ex: /products" {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+                  </div>
                 </form>
               </Form>
             </div>
-            <DialogFooter>
+            <DialogFooter className="pt-4">
               <Button type="submit" form="bannerForm" disabled={addBannerMutation.isPending || updateBannerMutation.isPending}>
                 {(addBannerMutation.isPending || updateBannerMutation.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Salvar
