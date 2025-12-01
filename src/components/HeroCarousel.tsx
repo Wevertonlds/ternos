@@ -55,7 +55,7 @@ const HeroCarousel = () => {
       <CarouselContent>
         {banners.map((banner, index) => {
           const imageFitClass = banner.image_fit === 'contain' ? 'bg-contain' : 'bg-cover';
-          const imagePositionClass = `bg-${banner.image_position || 'center'}`;
+          const imagePositionClass = `bg-${banner.image_position || 'top'}`;
 
           return (
             <CarouselItem key={index}>
